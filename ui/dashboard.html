@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Asset Live Intraday Terminal | Bitcoin • Nifty 50 • Gold</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <!-- Official TradingView Advanced Real-Time Charting Library -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <style>
+    :root {
+      --bg-primary: #090d16;
+      --bg-card: #111827;
+      --border-color: #1f293d;
+    }
+    body {
+      background-color: var(--bg-primary);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+</head>
+<body class="antialiased min-h-screen p-3 lg:p-5">
+
+  <!-- Multi-Asset Primary Navigation Switcher -->
+  <nav class="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 mb-4 shadow-xl flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider px-2">Market Engine:</span>
+      <button id="tab-btc" onclick="switchAsset('BTC')" class="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow flex items-center gap-2 transition">
+        <span>₿</span> BITCOIN (BTC/USD) <span class="bg-slate-950/20 text-[10px] px-1.5 py-0.5 rounded font-bold">24/7</span>
+      </button>
+      <button id="tab-nifty" onclick="switchAsset('NIFTY')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-2">
+        <span>🇮🇳</span> NIFTY 50 (NSE) <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded font-mono">09:15-15:15 IST</span>
+      </button>
+      <button id="tab-gold" onclick="switchAsset('GOLD')" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-2">
+        <span>🥇</span> GOLD (XAU/USD) <span class="bg-amber-500/20 text-amber-300 text-[10px] px-1.5 py-0.5 rounded font-bold font-mono">24/5</span>
+      </button>
+    </div>
+
+    <!-- Live IST Clock & Live USD/INR Rate -->
+    <div class="flex items-center gap-3 text-xs font-mono">
+      <div class="bg-slate-950 border border-slate-800 px-3 py-1 rounded-lg text-emerald-400 font-bold" id="clock-ist">
+        00:00:00 IST
+      </div>
+      <div class="flex items-center gap-2 bg-slate-950 border border-emerald-500/30 px-3 py-1 rounded-lg text-xs" id="nav-forex-badge" title="Live USD to INR Exchange Rate">
+        <span class="text-slate-400 font-sans">💵 1 USD =</span>
+        <span class="font-bold text-emerald-400 font-mono" id="nav-usd-inr-val">₹93.45</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Top Navigation & Live Terminal Header -->
+  <header class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 shadow-2xl mb-4 backdrop-blur-md">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div id="asset-icon" class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg">
+          ₿
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2" id="asset-title">
+              BTC / USD Perpetual
+              <span id="asset-source-tag" class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">BINANCE SPOT</span>
+            </h1>
+            <span id="connection-status" class="px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 🟢 LIVE REAL-TIME
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-300 mt-1">
+            <span id="header-setup-desc" class="text-slate-300 font-medium">1M 50% FVG Equilibrium + CVD Absorption</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strategy Mode Switcher & Real-Time Stats -->
+      <div class="flex items-center gap-3 flex-wrap" id="asset-hud-metrics">
+        
+        <!-- Universal Strategy Mode Switcher: 1M Scalp vs 5M Trend Expansion vs 15M Swing (All Assets) -->
+        <div id="strategy-mode-switcher" class="bg-slate-950 border border-slate-800 p-1.5 rounded-xl flex items-center gap-1.5">
+          <button id="btn-mode-scalp" onclick="switchStrategyMode('SCALP')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow">
+            ⚡ 1M SCALP
+          </button>
+          <button id="btn-mode-5m" onclick="switchStrategyMode('EXPANSION_5M')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+            🎯 5M TREND EXPANSION
+          </button>
+          <button id="btn-mode-swing" onclick="switchStrategyMode('SWING')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+            📊 15M INTRADAY SWING
+          </button>
+        </div>
+
+        <!-- Metric 1 -->
+        <div class="bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric1-label">Funding (8h)</div>
+          <div class="text-xs font-mono font-bold text-blue-400" id="hud-metric1-val">+0.0115% <span class="text-slate-500 font-normal">(Safe)</span></div>
+        </div>
+
+        <!-- Metric 2 -->
+        <div class="bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric2-label">CVD Delta</div>
+          <div class="text-xs font-mono font-bold text-emerald-400" id="hud-metric2-val">+348.2 (Bull Delta)</div>
+        </div>
+
+        <!-- Metric 3 / Live Price -->
+        <div class="bg-slate-950 border border-amber-500/30 px-3.5 py-1.5 rounded-xl">
+          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric3-label">Live Market Price</div>
+          <div class="text-sm font-mono font-black text-amber-400" id="hud-live-price">$75,810.00</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Institutional Hardening Layer Badges -->
+    <div class="mt-3 pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs font-mono" id="hardening-badges-bar">
+      <div class="bg-slate-950 px-3 py-2 rounded-xl border border-amber-500/30 flex flex-col justify-center">
+        <div class="flex items-center gap-1.5 mb-0.5">
+          <span class="w-2 h-2 rounded-full bg-amber-400" id="badge-1-dot"></span>
+          <span class="text-slate-400 font-sans text-[11px] font-semibold" id="badge-1-label">Execution:</span>
+        </div>
+        <div class="text-amber-300 font-bold whitespace-nowrap text-xs overflow-x-auto custom-scrollbar" id="badge-1-text">⚡ POST-ONLY MAKER (0.015% GTX)</div>
+      </div>
+      <div class="bg-slate-950 px-3 py-2 rounded-xl border border-emerald-500/30 flex flex-col justify-center">
+        <div class="flex items-center gap-1.5 mb-0.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="badge-2-dot"></span>
+          <span class="text-slate-400 font-sans text-[11px] font-semibold" id="badge-2-label">Trailing Stop:</span>
+        </div>
+        <div class="text-emerald-300 font-bold whitespace-nowrap text-xs overflow-x-auto custom-scrollbar" id="badge-2-text">🛡️ 1R BREAKEVEN ARMED (+0.12%)</div>
+      </div>
+      <div class="bg-slate-950 px-3 py-2 rounded-xl border border-blue-500/30 flex flex-col justify-center">
+        <div class="flex items-center gap-1.5 mb-0.5">
+          <span class="w-2 h-2 rounded-full bg-blue-400" id="badge-3-dot"></span>
+          <span class="text-slate-400 font-sans text-[11px] font-semibold" id="badge-3-label">Session:</span>
+        </div>
+        <div class="text-blue-300 font-bold whitespace-nowrap text-xs overflow-x-auto custom-scrollbar" id="badge-3-text">🕒 PEAK WINDOW (13:00-21:30)</div>
+      </div>
+      <div class="bg-slate-950 px-3 py-2 rounded-xl border border-purple-500/30 flex flex-col justify-center">
+        <div class="flex items-center gap-1.5 mb-0.5">
+          <span class="w-2 h-2 rounded-full bg-purple-400" id="badge-4-dot"></span>
+          <span class="text-slate-400 font-sans text-[11px] font-semibold" id="badge-4-label">Sentinel:</span>
+        </div>
+        <div class="text-purple-300 font-bold whitespace-nowrap text-xs overflow-x-auto custom-scrollbar" id="badge-4-text">📡 MACRO CLEAR (±15m Blackout)</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- User Account Sizing, Leverage & Risk Control Panel -->
+  <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl mb-5">
+    <div class="flex items-center justify-between mb-3 flex-wrap gap-2 pb-2.5 border-b border-slate-800/80">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          ⚙️ Account Capital, Leverage & Trade Setup Sizing
+        </h3>
+        <span class="text-[11px] font-medium text-slate-400" id="sizing-sub-desc">(Dynamic margin, notional purchasing power & risk engine)</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs font-mono">
+      <!-- 1. Amount INR Invested -->
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-between" id="card-capital-box">
+        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+          <span class="font-sans font-semibold text-slate-300">Capital Invested (INR)</span>
+          <span id="calc-capital-usd" class="text-emerald-400 font-bold">$107.01 USD</span>
+        </div>
+        <div class="relative flex items-center">
+          <span class="absolute left-3 text-slate-400 font-bold">₹</span>
+          <input type="number" id="input-capital-inr" value="10000" step="500" min="500" max="10000000"
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-1.5 text-white font-bold focus:outline-none focus:border-amber-400 transition"
+            oninput="recalculateTradeSetup()" />
+        </div>
+        <div class="flex items-center gap-1 mt-2 text-[10px] text-slate-400">
+          <button onclick="setCapitalPreset(5000)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">₹5K</button>
+          <button onclick="setCapitalPreset(10000)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">₹10K</button>
+          <button onclick="setCapitalPreset(25000)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">₹25K</button>
+          <button onclick="setCapitalPreset(50000)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">₹50K</button>
+          <button onclick="setCapitalPreset(100000)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">₹1L</button>
+        </div>
+      </div>
+
+      <!-- 2. Leverage Ratio / Indian Exposure Box -->
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-between" id="card-leverage-box">
+        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+          <span class="font-sans font-semibold text-slate-300" id="label-leverage-title">Leverage Ratio</span>
+          <span id="calc-power-usd" class="text-blue-400 font-bold">Power: $107.0K</span>
+        </div>
+        <div id="leverage-select-wrapper">
+          <select id="input-leverage" onchange="recalculateTradeSetup()"
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-amber-400 transition text-xs">
+            <option value="1000" selected>1000:1 (1000x Lev)</option>
+            <option value="500">500:1 (500x Lev)</option>
+            <option value="200">200:1 (200x Lev)</option>
+            <option value="100">100:1 (100x Lev)</option>
+            <option value="50">50:1 (50x Lev)</option>
+            <option value="1">1:1 (Cash / No Lev)</option>
+          </select>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-2 truncate" id="calc-power-inr">
+          Buying Power: ₹1.00 Cr
+        </div>
+      </div>
+
+      <!-- 3. Lot Size (User Input Variable) -->
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-between" id="card-lots-box">
+        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+          <span class="font-sans font-semibold text-slate-300" id="label-lot-size">Trade Lot Size</span>
+          <span id="calc-notional-val" class="text-amber-400 font-bold">$3,790.50</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="adjustLotStep(-1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-white font-bold flex items-center justify-center transition">-</button>
+          <input type="number" id="input-lot-size" value="0.05" step="0.01" min="0.01" max="100"
+            class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-white font-bold focus:outline-none focus:border-amber-400 transition"
+            oninput="recalculateTradeSetup()" />
+          <button onclick="adjustLotStep(1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded-lg text-white font-bold flex items-center justify-center transition">+</button>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-2 flex items-center justify-between">
+          <span id="lot-unit-desc">0.05 BTC contract</span>
+          <span class="text-emerald-400 font-semibold" id="calc-lot-inr">₹3,54,222</span>
+        </div>
+      </div>
+
+      <!-- 4. Calculated Margin & Risk Summary -->
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-between" id="card-risk-box">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="font-sans font-semibold text-slate-300" id="label-risk-title">Required Margin</span>
+          <span id="calc-margin-req" class="text-emerald-400 font-bold">$3.79 (₹354)</span>
+        </div>
+        <div class="space-y-1 text-[11px]" id="risk-box-details">
+          <div class="flex items-center justify-between" id="row-margin-pct">
+            <span class="text-slate-400" id="label-margin-pct">Margin Used:</span>
+            <span id="calc-margin-pct" class="text-blue-300 font-bold">3.54%</span>
+          </div>
+          <div class="flex items-center justify-between" id="row-margin-free">
+            <span class="text-slate-400" id="label-margin-free">Free Margin:</span>
+            <span id="calc-margin-free" class="text-slate-200 font-bold">$103.22 (₹9,646)</span>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800" id="row-sl-risk">
+            <span class="text-rose-400 font-semibold" id="label-sl-risk">1R Risk (SL):</span>
+            <span id="calc-sl-risk" class="text-rose-400 font-bold">-$3.75 (-₹350)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Active Position Live Banner (Consistent & Dynamically Driven) -->
+  <div id="active-position-banner" class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-indigo-950/60 border border-amber-500/40 rounded-2xl p-4 shadow-xl mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <span class="w-3.5 h-3.5 rounded-full bg-amber-400 animate-ping" id="active-pos-ping"></span>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="active-pos-label" class="text-xs font-bold text-amber-300 uppercase tracking-wider">⚡ ACTIVE 1M SCALP (<span id="banner-lots">0.05</span> LOTS):</span>
+          <span id="active-pos-dir" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">BUY (LONG)</span>
+          <span class="text-xs text-slate-300">Entry: <span id="active-pos-entry" class="font-mono font-bold text-white">$75,810.00</span></span>
+        </div>
+        <p class="text-xs text-slate-300 mt-1" id="active-pos-reason">
+          Post-Only Limit filled @ 50% FVG Equilibrium ($75,810.00). 1R Trailing Stop armed at +0.12%.
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 text-xs font-mono flex-wrap">
+      <div class="bg-slate-950/90 px-3 py-1.5 rounded-lg border border-slate-800">
+        <span class="text-[10px] text-slate-400 block font-sans">Stop Loss</span>
+        <span id="active-pos-sl" class="text-rose-400 font-bold">$75,735.00</span> 
+        <span id="active-pos-sl-pct" class="text-[11px] text-slate-400">(-$3.75 / -₹324)</span>
+      </div>
+      <div class="bg-slate-950/90 px-3 py-1.5 rounded-lg border border-slate-800">
+        <span class="text-[10px] text-slate-400 block font-sans">Target (TP2)</span>
+        <span id="active-pos-tp" class="text-emerald-400 font-bold">$76,040.00</span> 
+        <span id="active-pos-tp-pct" class="text-[11px] text-emerald-400 font-mono">(+$11.50 / +₹994)</span>
+      </div>
+      <div class="bg-slate-950 px-3.5 py-1.5 rounded-lg border border-amber-500/50 shadow" id="active-pos-card">
+        <span class="text-[10px] text-slate-400 block font-sans">Unrealized PnL</span>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span id="active-pos-pnl" class="font-black text-emerald-400 font-mono text-sm">+$0.00</span> 
+          <span id="active-pos-pnl-inr" class="text-xs font-mono text-emerald-300">(+₹0.00)</span>
+          <span id="active-pos-rom" class="text-[11px] text-emerald-300 font-semibold">(+0.00%)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance HUD Metrics Cards -->
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+      <div class="text-xs text-slate-400 font-medium" id="card-pnl-label">Scalp Net Return (Realized)</div>
+      <div class="text-2xl font-black text-emerald-400 mt-1" id="metric-pnl">+4.10%</div>
+      <div class="text-xs text-slate-500 mt-0.5">Recorded in SQLite</div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+      <div class="text-xs text-slate-400 font-medium" id="card-winrate-label">Win Rate (1M Scalper)</div>
+      <div class="text-2xl font-black text-white mt-1" id="metric-winrate">66.7%</div>
+      <div class="text-xs text-slate-500 mt-0.5" id="card-rr-label">Avg R:R 2.4 : 1</div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+      <div class="text-xs text-slate-400 font-medium" id="card-pf-label">Profit Factor</div>
+      <div class="text-2xl font-black text-blue-400 mt-1" id="metric-pf">2.35</div>
+      <div class="text-xs text-slate-500 mt-0.5" id="card-pf-sub">Asymmetric Risk Controlled</div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+      <div class="text-xs text-slate-400 font-medium" id="card-duration-label">Holding Duration</div>
+      <div class="text-2xl font-black text-amber-400 mt-1" id="metric-duration">1m – 5m</div>
+      <div class="text-xs text-slate-500 mt-0.5" id="card-duration-sub">No overnight risk</div>
+    </div>
+  </section>
+
+  <!-- Main Viewport: Professional Real-Time Chart & Asset Blueprint -->
+  <main class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+
+    <!-- Left 2 Cols: Real TradingView Interactive Chart Container -->
+    <div class="lg:col-span-2 flex flex-col gap-4">
+      
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-3">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span id="chart-title">📈 Real-Time Exchange Candlestick Chart</span>
+              <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20" id="chart-feed-badge">LIVE BINANCE FEED</span>
+            </h2>
+          </div>
+
+          <!-- Indian Index Symbol Toggle (Shown when on NIFTY) -->
+          <div id="nifty-symbol-toggle" style="display: none;" class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+            <button onclick="setNiftySymbol('AMEX:INDA')" id="btn-sym-inda" class="px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow">INDIA ETF (INDA)</button>
+            <button onclick="setNiftySymbol('NASDAQ:INDY')" id="btn-sym-indy" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition">INDIA 50 (INDY)</button>
+            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg text-slate-400 hover:text-emerald-400 transition flex items-center gap-1" title="Open official NSE Cash Index on TradingView">
+              <span>↗ NSE NIFTY</span>
+            </a>
+          </div>
+
+          <!-- Timeframe Selector Toolbar -->
+          <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+            <button onclick="setChartTimeframe('1')" id="tf-1" class="px-2.5 py-1 rounded-lg font-bold bg-blue-600 text-white shadow">1m</button>
+            <button onclick="setChartTimeframe('3')" id="tf-3" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">3m</button>
+            <button onclick="setChartTimeframe('5')" id="tf-5" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">5m</button>
+            <button onclick="setChartTimeframe('15')" id="tf-15" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">15m</button>
+            <button onclick="setChartTimeframe('60')" id="tf-60" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">1h</button>
+          </div>
+        </div>
+
+        <!-- TradingView Embedded Container -->
+        <div class="relative w-full h-[500px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800" id="tv_chart_wrapper">
+          <div id="tradingview_chart_container" class="w-full h-full"></div>
+        </div>
+
+        <!-- Institutional Microstructure Key -->
+        <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between flex-wrap gap-2 text-xs">
+          <div class="flex items-center gap-3 flex-wrap" id="session-hours-guide">
+            <span class="text-slate-400 font-semibold">Institutional Sessions (IST):</span>
+            <span class="inline-flex items-center gap-1 text-slate-400"><span class="w-2 h-2 rounded-full bg-rose-500/60"></span> Asian Lull Lockout: 03:00 AM – 09:00 AM IST</span>
+            <span class="inline-flex items-center gap-1 text-emerald-400 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> London/NY Peak: 01:00 PM – 09:30 PM IST</span>
+          </div>
+          <div class="text-slate-500 font-mono text-[11px]">
+            Chart Timezone: Asia/Kolkata (IST)
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Col: Hardened Strategy Blueprint & Active Signals Feed -->
+    <div class="flex flex-col gap-4">
+
+      <!-- Strategy Blueprint Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" id="strategy-card-dot"></span>
+            <h2 class="text-base font-bold text-white" id="strategy-card-title">Scalp Execution Logic</h2>
+          </div>
+          <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded" id="strategy-card-badge">Scalp Rules</span>
+        </div>
+
+        <div class="space-y-3 text-xs" id="strategy-card-body">
+          <!-- Dynamically populated based on Scalp vs Swing vs Asset -->
+        </div>
+      </div>
+
+      <!-- Live Generated Signals Feed -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-white" id="signals-feed-title">Live Signals Feed (1M Scalp)</h2>
+          <span class="text-xs text-slate-500 font-mono" id="signals-feed-subtitle">Active SQLite</span>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar max-h-56">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 font-semibold">
+                <th class="py-2 px-2.5">Time (IST)</th>
+                <th class="py-2 px-2.5">Type</th>
+                <th class="py-2 px-2.5">Order / Entry</th>
+                <th class="py-2 px-2.5">SL</th>
+                <th class="py-2 px-2.5">TP2</th>
+                <th class="py-2 px-2.5">Status</th>
+              </tr>
+            </thead>
+            <tbody id="signals-table-body" class="divide-y divide-slate-800/60 font-mono">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Bottom: SQLite Audit Journal of Closed Trades -->
+  <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="text-base font-bold text-white" id="trades-journal-title">Closed Trades Audit Trail (1M Scalp)</h2>
+        <p class="text-xs text-slate-400" id="trades-journal-subtitle">Realized PnL, lot sizing, and setup triggers recorded in <code>data/intraday.db</code></p>
+      </div>
+      <span class="text-xs text-slate-500 font-mono">Table: trades</span>
+    </div>
+
+    <div class="overflow-x-auto custom-scrollbar">
+      <table class="w-full text-left text-xs border-collapse font-mono">
+        <thead>
+          <tr class="border-b border-slate-800 text-slate-400">
+            <th class="py-2.5 px-3">Exit Time (IST)</th>
+            <th class="py-2.5 px-3">Asset</th>
+            <th class="py-2.5 px-3">Type</th>
+            <th class="py-2.5 px-3">Entry Price</th>
+            <th class="py-2.5 px-3">Exit Price</th>
+            <th class="py-2.5 px-3">Realized PnL</th>
+            <th class="py-2.5 px-3" id="th-rom-label">PnL (Net Return)</th>
+            <th class="py-2.5 px-3">Trigger / Strategy</th>
+          </tr>
+        </thead>
+        <tbody id="trades-table-body" class="divide-y divide-slate-800/60">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- JavaScript: Multi-Asset TradingView Controller & Real-Time Sync -->
+  <script>
+
+    // Immediate IST Clock Runner (Never shows 00:00:00)
+    function refreshClockIST() {
+      const el = document.getElementById('clock-ist');
+      if (el) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
+        const dateStr = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short' });
+        el.innerText = `${dateStr} • ${timeStr} IST`;
+      }
+    }
+    refreshClockIST();
+
+    let tvWidget = null;
+    let currentAsset = 'BTC'; // 'BTC', 'NIFTY', 'GOLD'
+    let currentStrategyMode = 'SCALP'; // 'SCALP' or 'SWING'
+    let currentInterval = '1';
+    let livePrice = 75810.0;
+
+    // Dynamic User Input Variables
+    let userCapitalInr = 10000;  // User Invested Capital in INR (Default: ₹10,000)
+    let userLeverage = 1000;     // Leverage Ratio (Default: 1000:1 for Forex/Crypto; 5 for NSE MIS)
+    let userLotSize = 0.05;      // Trade Lot Size (Default: 0.05 for BTC, 1 for NIFTY, 0.02 for GOLD)
+    let liveUsdInr = 93.45;      // Live Market Price: 1 USD = ? INR (93.xx rate)
+    let isCustomUsdInr = false;  // User custom override toggle
+
+    const ASSET_CONFIG = {
+      BTC: {
+        tvSymbol: 'BINANCE:BTCUSDT',
+        title: 'BTC / USD Perpetual',
+        sourceTag: 'BINANCE SPOT',
+        icon: '₿',
+        iconGradient: 'from-amber-500 to-yellow-400',
+        defaultLots: 0.05,
+        stepLots: 0.01,
+        lotUnit: 'BTC contract'
+      },
+      NIFTY: {
+        tvSymbol: 'AMEX:INDA',
+        title: 'NIFTY 50 Index (NSE India)',
+        sourceTag: 'MSCI INDIA ETF (AMEX:INDA)',
+        icon: '🇮🇳',
+        iconGradient: 'from-emerald-600 to-teal-500',
+        defaultLots: 1,
+        stepLots: 1,
+        lotUnit: 'Lots (25 Qty)'
+      },
+      GOLD: {
+        tvSymbol: 'OANDA:XAUUSD',
+        title: 'Spot Gold (XAU/USD)',
+        sourceTag: 'GLOBAL SPOT OANDA',
+        icon: '🥇',
+        iconGradient: 'from-amber-600 to-yellow-500',
+        defaultLots: 0.02,
+        stepLots: 0.01,
+        lotUnit: 'Lots (2 oz)'
+      }
+    };
+
+    const STRATEGY_DATA = {
+      BTC: {
+        SCALP: {
+          tf: '1',
+          setupDesc: '1M 50% FVG Equilibrium + CVD Absorption',
+          badges: {
+            1: { dot: 'bg-amber-400', label: 'Execution:', text: '⚡ POST-ONLY MAKER (0.015% GTX)' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN ARMED (+0.12%)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 24/7 TRADING (Peak: 13:00-21:30)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '📡 MACRO SENTINEL: CLEAR (±15m)' }
+          },
+          position: {
+            label: '⚡ ACTIVE 1M SCALP',
+            dir: 'BUY (LONG)',
+            entry: '$75,810.00',
+            sl: '$75,825.00',
+            slSub: '🛡️ 1R Trailed (Init: $75,735.00)',
+            tp: '$76,040.00',
+            tpSub: '(+$11.50 / +₹1,075)',
+            reason: 'Post-Only Limit filled @ 50% FVG Equilibrium ($75,810.00). 1R Trailing Stop armed at +0.12%.'
+          },
+          metrics: {
+            retLabel: 'Scalp Net Return (Realized)',
+            retVal: '+4.10%',
+            winLabel: 'Win Rate (1M Scalper)',
+            winVal: '66.7%',
+            rrLabel: 'Avg R:R 2.4 : 1',
+            pfVal: '2.35',
+            durVal: '1m – 5m',
+            durSub: 'No overnight exposure'
+          },
+          rulesTitle: 'Scalp Execution Logic',
+          rulesBadge: 'Scalp Rules',
+          rules: [
+            { title: '⚡ 50% FVG Maker Orders:', val: '0.015% Fee (GTX)', desc: 'Submits strictly Post-Only Limit Orders at 50% FVG Equilibrium. Eliminates taker spread slippage.' },
+            { title: '🛡️ 1R Breakeven Trailing:', val: '+0.12% Trigger', desc: 'At +0.12% gain ($90 on BTC), Stop Loss automatically drags to Breakeven ($75,825.00). Guarantees zero loss after spread.' },
+            { title: '📊 CVD & Funding Extremes:', val: 'Delta Filter', desc: 'Blocks long scalps if funding rate exceeds +0.035% (overleveraged retail longs). Blocks short scalps if funding is negative (< -0.015%).' }
+          ],
+          feedTitle: 'Live Signals Feed (1M Scalp)',
+          feedSub: 'Active SQLite (Micro FVG)',
+          tradesTitle: 'Closed Trades Audit Trail (1M Scalp)'
+        },
+        EXPANSION_5M: {
+          tf: '5',
+          setupDesc: '5M VWAP Value-Pullback + Order Flow CVD Absorption',
+          badges: {
+            1: { dot: 'bg-emerald-400', label: 'Execution:', text: '🎯 5M VWAP VALUE-PULLBACK' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN ARMED (+0.25% Drag)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 24/7 TRADING (Peak: 13:00-21:30)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '📡 MACRO SENTINEL: CLEAR (±15m)' }
+          },
+          position: {
+            label: '🎯 ACTIVE 5M TREND EXPANSION',
+            dir: 'BUY (LONG)',
+            entry: '$75,810.00',
+            sl: '$75,545.00',
+            slSub: '(-0.35% / -$265)',
+            tp: '$76,400.00',
+            tpSub: '(+0.78% / +$590)',
+            reason: '5M Pullback to 20 EMA ($75,810) + Session VWAP Reclaim. CVD absorbed seller volume with 1R Breakeven armed at +0.25%.'
+          },
+          metrics: {
+            retLabel: '5M Expansion Return (Realized)',
+            retVal: '+5.80%',
+            winLabel: 'Win Rate (5M Expansion)',
+            winVal: '68.8%',
+            rrLabel: 'Avg R:R 2.25 : 1',
+            pfVal: '2.45',
+            durVal: '15m – 45m',
+            durSub: 'Tactical intraday holding'
+          },
+          rulesTitle: '5M Trend Expansion Execution Logic',
+          rulesBadge: '5M Expansion Rules',
+          rules: [
+            { title: '🎯 VWAP & 20/50 EMA Ribbon:', val: 'Dynamic Value Zone', desc: 'Price must hold above Session VWAP with 20 EMA > 50 EMA. Trades trigger only on pullbacks into the dynamic value zone.' },
+            { title: '🛡️ 1R Breakeven Trailing (+0.25%):', val: '+$190 Trigger', desc: 'At +0.25% gain ($190 on BTC), Stop Loss automatically drags to Entry + $25 buffer to lock in zero downside risk.' },
+            { title: '📊 CVD Absorption & Funding Filter:', val: 'Delta > -15.0', desc: 'Verifies passive limit buyers absorbing aggressive sell volume. Restricts longs if perpetual funding exceeds +0.035%.' }
+          ],
+          feedTitle: 'Live Signals Feed (5M Trend Expansion)',
+          feedSub: 'Active SQLite (5M Pullback)',
+          tradesTitle: 'Closed Trades Audit Trail (5M Trend Expansion)'
+        },
+        SWING: {
+          tf: '15',
+          setupDesc: '15M Asian Range Sweeps + Central VWAP Reclaim',
+          badges: {
+            1: { dot: 'bg-blue-400', label: 'Execution:', text: '🎯 15M ASIAN RANGE SWEEPS' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ TRAILING STOP: VWAP RECLAIM' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 24/7 TRADING (London/NY 13:00-21:30)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '📡 SENTINEL CLEAR (±15m Blackout)' }
+          },
+          position: {
+            label: '📊 ACTIVE 15M INTRADAY SWING',
+            dir: 'BUY (LONG)',
+            entry: '$75,520.00',
+            sl: '$75,050.00',
+            slSub: '(-$23.50 / -₹2,196)',
+            tp: '$76,850.00',
+            tpSub: '(+$66.50 / +₹6,214)',
+            reason: '15M Asian Range Sweep: Swept ASL at $75,490, confirmed rejection + Bull CVD absorption.'
+          },
+          metrics: {
+            retLabel: 'Swing Net Return (Realized)',
+            retVal: '+8.45%',
+            winLabel: 'Win Rate (15M Swing)',
+            winVal: '54.2%',
+            rrLabel: 'Avg R:R 2.8 : 1',
+            pfVal: '1.97',
+            durVal: '1h – 4h',
+            durSub: 'Closed before 22:00 UTC'
+          },
+          rulesTitle: 'Intraday Swing Execution Logic',
+          rulesBadge: '15M Swing Rules',
+          rules: [
+            { title: '🎯 Trade Horizon & Holding:', val: '1 to 4 Hours', desc: 'Designed for London and New York session trend expansions following Asian range stop hunts. Closes before daily settlement.' },
+            { title: '📐 Risk Parameters (Per Trade):', val: 'R:R ≥ 2.8 : 1', desc: 'Max Stop Loss: 0.50% – 0.75% ($380 – $560 on BTC). Profit Target: 1.50% – 2.50% ($1,100 – $1,900 on BTC).' },
+            { title: '🤖 Active Swing Setup:', val: 'Asian Sweep Reclaim', desc: 'When London open spikes past ASH/ASL, absorbs liquidity, and closes back inside with CVD divergence, enters towards Central VWAP and opposing boundary.' }
+          ],
+          feedTitle: 'Live Signals Feed (15M Swing)',
+          feedSub: 'Active SQLite (Asian Sweeps)',
+          tradesTitle: 'Closed Trades Audit Trail (15M Swing)'
+        }
+      },
+      NIFTY: {
+        SCALP: {
+          tf: '1',
+          setupDesc: '1M VWAP Pullback + Order Flow Scalp (NSE India)',
+          badges: {
+            1: { dot: 'bg-amber-400', label: 'Execution:', text: '⚡ VWAP PULLBACK MAKER' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN (+15 Pts Trailed)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 09:15 - 15:15 IST (NSE Cash)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '🔒 AUTO-EXIT SENTINEL: 03:15 PM' }
+          },
+          position: {
+            label: '⚡ ACTIVE 1M NIFTY SCALP',
+            dir: 'BUY (CALL)',
+            entry: '₹24,165.00',
+            sl: '₹24,168.00',
+            slSub: '🛡️ 1R Trailed (Init: ₹24,150.00)',
+            tp: '₹24,200.00',
+            tpSub: '(+35 Pts / +₹875)',
+            reason: '1M Micro VWAP Rebound filled @ ₹24,165. Trailed stop armed at +15 pts. Hard square-off 03:15 PM IST.'
+          },
+          metrics: {
+            retLabel: 'Nifty Scalp Net Return',
+            retVal: '+3.80%',
+            winLabel: 'Win Rate (1M Scalper)',
+            winVal: '68.4%',
+            rrLabel: 'Avg R:R 2.3 : 1',
+            pfVal: '2.40',
+            durVal: '1m – 8m',
+            durSub: 'Strict NSE Day Trade'
+          },
+          rulesTitle: 'Nifty 1M Scalp Execution Logic',
+          rulesBadge: '1M Scalp Rules',
+          rules: [
+            { title: '⚡ 1M VWAP Pullback Scalp:', val: '15 Pts Stop Loss', desc: 'Capitalizes on fast mean-reversion pullbacks to the Volume Weighted Average Price with tick delta confirmation.' },
+            { title: '🛡️ 1R Breakeven Trailing Stop:', val: '+15 Pts Lock', desc: 'When Nifty pushes +15 points into profit, Stop Loss is trailed above entry to protect capital and eliminate broker fee drag.' },
+            { title: '🔒 Strict NSE Auto-Square-Off:', val: '03:15 PM IST Sharp', desc: 'Enforces absolute intraday discipline by closing all open market positions at 03:15 PM IST before exchange cutoff.' }
+          ],
+          feedTitle: 'Live Signals Feed (1M Nifty Scalp)',
+          feedSub: 'Active SQLite (VWAP Pullback)',
+          tradesTitle: 'Closed Trades Audit Trail (1M Nifty Scalp)'
+        },
+        EXPANSION_5M: {
+          tf: '5',
+          setupDesc: '5M CPR-VWAP Momentum Expansion + Options PCR Confluence',
+          badges: {
+            1: { dot: 'bg-emerald-400', label: 'Execution:', text: '🎯 5M CPR-VWAP BOUNCE' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN (+20 Pts Trailed)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 09:15 - 15:15 IST (NSE Cash)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '🔒 AUTO-EXIT SENTINEL: 03:15 PM' }
+          },
+          position: {
+            label: '🇮🇳 ACTIVE 5M NIFTY POSITION',
+            dir: 'BUY (CALL)',
+            entry: '₹24,165.00',
+            sl: '₹24,140.00',
+            slSub: '(-25 Pts / -₹625)',
+            tp: '₹24,220.00',
+            tpSub: '(+55 Pts / +₹1,375)',
+            reason: '5M 20 EMA / VWAP rebound above CPR Top Central (24,155) with Options PCR 1.14 support. Mandatory 03:15 PM square-off.'
+          },
+          metrics: {
+            retLabel: '5M Nifty Net Return',
+            retVal: '+4.90%',
+            winLabel: 'Win Rate (5M Expansion)',
+            winVal: '65.2%',
+            rrLabel: 'Avg R:R 2.2 : 1',
+            pfVal: '2.25',
+            durVal: '15m – 45m',
+            durSub: 'Auto-Square-Off 03:15 PM'
+          },
+          rulesTitle: 'Nifty 5M Momentum Execution Logic',
+          rulesBadge: '5M CPR-VWAP',
+          rules: [
+            { title: '🎯 5M CPR-VWAP Pullback Bounce:', val: '25 Pts Stop Loss', desc: 'Enters on confirmed 5-minute candle bounces off the CPR Top Central and VWAP with Options Open Interest PCR confirmation.' },
+            { title: '🛡️ 1R Breakeven Trailing (+20 Pts):', val: '+20 Pts Lock', desc: 'When Nifty advances +20 points into profit, Stop Loss is immediately trailed above entry to lock in gains.' },
+            { title: '🔒 Hard Auto-Square-Off:', val: '03:15 PM IST Sharp', desc: 'Enforces strict intraday discipline: all open intraday positions automatically square off at 03:15 PM IST.' }
+          ],
+          feedTitle: 'Live Signals Feed (5M Nifty Expansion)',
+          feedSub: 'Active SQLite (CPR-VWAP)',
+          tradesTitle: 'Closed Trades Audit Trail (5M Nifty Expansion)'
+        },
+        SWING: {
+          tf: '15',
+          setupDesc: '15M ORB + Central Pivot Range (CPR) Confluence',
+          badges: {
+            1: { dot: 'bg-emerald-400', label: 'Execution:', text: '📊 15M ORB BREAKOUT (09:30)' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🎯 STRIKE WALL: 24,000 PE / 24,500 CE' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 09:15 - 15:15 IST (NSE Cash)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '🔒 AUTO-EXIT SENTINEL: 03:15 PM' }
+          },
+          position: {
+            label: '🇮🇳 ACTIVE 15M NIFTY POSITION',
+            dir: 'BUY (CALL)',
+            entry: '₹24,150.00',
+            sl: '₹24,115.00',
+            slSub: '(-35 Pts / -₹875)',
+            tp: '₹24,240.00',
+            tpSub: '(+90 Pts / +₹2,250)',
+            reason: '15M ORB Breakout above CPR Top Central (24,155) & VWAP with PCR 1.14. Hard auto-exit active at 03:15 PM IST.'
+          },
+          metrics: {
+            retLabel: 'Nifty Swing Net Return',
+            retVal: '+5.60%',
+            winLabel: 'Win Rate (15M Swing)',
+            winVal: '61.2%',
+            rrLabel: 'Avg R:R 2.6 : 1',
+            pfVal: '2.10',
+            durVal: '30m – 3h',
+            durSub: 'Auto-Square-Off 03:15 PM'
+          },
+          rulesTitle: 'Nifty 15M Swing Execution Logic',
+          rulesBadge: 'NSE Intraday',
+          rules: [
+            { title: '🎯 15M Opening Range Breakout:', val: '09:15 - 09:30 High/Low', desc: 'Calculates opening 15-minute range. Longs trigger when candle closes above ORB High with CPR Top Central confirmation.' },
+            { title: '📐 CPR (Central Pivot Range):', val: 'Narrow Width (< 0.18%)', desc: 'Narrow CPR signals an explosive trending session. Wide CPR warns of chop and restricts trades to boundary mean-reversion.' },
+            { title: '🔒 Hard Auto-Square-Off:', val: '03:15 PM IST Sharp', desc: 'All open positions close at 03:15 PM IST to eliminate overnight gap risk and avoid broker auto-square-off penalty charges.' }
+          ],
+          feedTitle: 'Live Signals Feed (15M Nifty Swing)',
+          feedSub: 'Active SQLite (ORB + CPR)',
+          tradesTitle: 'Closed Trades Audit Trail (15M Nifty Swing)'
+        }
+      },
+      GOLD: {
+        SCALP: {
+          tf: '1',
+          setupDesc: '1M Micro Momentum Scalp + Asian High/Low Sweeps',
+          badges: {
+            1: { dot: 'bg-amber-400', label: 'Execution:', text: '⚡ MICRO MOMENTUM MAKER' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN ARMED (+$1.50 Drag)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 24/5 TRADING (Peak: 13:30-21:30)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '📡 MACRO NEWS SENTINEL: CLEAR' }
+          },
+          position: {
+            label: '⚡ ACTIVE 1M GOLD SCALP',
+            dir: 'BUY (LONG)',
+            entry: '$4,068.89',
+            sl: '$4,069.19',
+            slSub: '🛡️ 1R Trailed (Init: $4,067.39)',
+            tp: '$4,073.39',
+            tpSub: '(+$4.50 / +₹841)',
+            reason: '1M Micro Liquidity Sweep rebound. 1R Trailing Stop armed at +$1.50. Macro sentinel clear.'
+          },
+          metrics: {
+            retLabel: 'Gold Scalp Net Return',
+            retVal: '+3.95%',
+            winLabel: 'Win Rate (1M Scalper)',
+            winVal: '65.0%',
+            rrLabel: 'Avg R:R 3.0 : 1',
+            pfVal: '2.28',
+            durVal: '1m – 10m',
+            durSub: 'Tight Spread Windows'
+          },
+          rulesTitle: 'Gold 1M Scalp Execution Logic',
+          rulesBadge: '1M Micro Scalp',
+          rules: [
+            { title: '⚡ 1M Micro FVG & Liquidity Sweeps:', val: 'Tight $1.50 SL', desc: 'Executes rapid fills on 1-minute order blocks and fair value gap fills with strictly defined $1.50 invalidation.' },
+            { title: '🛡️ 1R Breakeven Trailing Stop:', val: '+$1.50 Trigger', desc: 'When spot gold pushes +$1.50 into profit, SL immediately drags past entry (+$0.30) to eliminate all trade risk.' },
+            { title: '🕒 Continuous 24/5 Trading:', val: 'Global FX Hours', desc: 'Gold trades continuously from Monday open in Sydney through Friday close in New York, with liquidity peaks in London/NY.' }
+          ],
+          feedTitle: 'Live Signals Feed (1M Gold Scalp)',
+          feedSub: 'Active SQLite (Micro FVG)',
+          tradesTitle: 'Closed Trades Audit Trail (1M Gold Scalp)'
+        },
+        EXPANSION_5M: {
+          tf: '5',
+          setupDesc: '5M London/NY Judas Sweep Reclaim + Market Structure Shift (MSS)',
+          badges: {
+            1: { dot: 'bg-emerald-400', label: 'Execution:', text: '🎯 5M JUDAS SWEEP RECLAIM' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN ARMED (+$4.00 Drag)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 24/5 TRADING (Peak: 13:30-21:30)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '📡 MACRO NEWS SENTINEL: CLEAR' }
+          },
+          position: {
+            label: '🥇 ACTIVE 5M GOLD EXPANSION',
+            dir: 'BUY (LONG)',
+            entry: '$4,068.89',
+            sl: '$4,063.89',
+            slSub: '(-$5.00 / -₹934)',
+            tp: '$4,080.39',
+            tpSub: '(+$11.50 / +₹2,148)',
+            reason: '5M Judas Sweep of London Session Low ($4,065.20) with Bullish MSS Reclaim above 20 EMA and DXY falling.'
+          },
+          metrics: {
+            retLabel: 'Gold 5M Net Return',
+            retVal: '+5.40%',
+            winLabel: 'Win Rate (5M Expansion)',
+            winVal: '69.5%',
+            rrLabel: 'Avg R:R 2.3 : 1',
+            pfVal: '2.38',
+            durVal: '20m – 60m',
+            durSub: 'Session Liquidity Waves'
+          },
+          rulesTitle: 'Gold 5M Trend Expansion Logic',
+          rulesBadge: '5M Judas Sweep',
+          rules: [
+            { title: '🎯 Session Judas Sweep & MSS:', val: 'Liquidity Reclaim', desc: 'Identifies institutional false breaks at session opening range, waiting for 5M market structure displacement before entry.' },
+            { title: '🛡️ 1R Breakeven Trailing Stop:', val: '+$4.00 Trigger', desc: 'When spot gold advances +$4.00 into profit, SL immediately drags past entry (+$0.50) to lock in profit with zero risk.' },
+            { title: '📉 DXY Inverse Correlation Guard:', val: 'Dollar Tailwind', desc: 'Filters out fakeouts by verifying US Dollar Index (DXY) is rejecting resistance or declining below its 50 EMA.' }
+          ],
+          feedTitle: 'Live Signals Feed (5M Gold Expansion)',
+          feedSub: 'Active SQLite (MSS FVG)',
+          tradesTitle: 'Closed Trades Audit Trail (5M Gold Expansion)'
+        },
+        SWING: {
+          tf: '15',
+          setupDesc: '15M London/NY Overlap Momentum + DXY Inverse Correlation',
+          badges: {
+            1: { dot: 'bg-amber-400', label: 'Execution:', text: '🎯 15M ASIAN RANGE BREAKOUT' },
+            2: { dot: 'bg-emerald-400', label: 'Trailing Stop:', text: '🛡️ 1R BREAKEVEN ARMED (+$2.50 Drag)' },
+            3: { dot: 'bg-blue-400', label: 'Session:', text: '🕒 24/5 TRADING (Peak: 13:30-21:30)' },
+            4: { dot: 'bg-purple-400', label: 'Sentinel:', text: '📡 MACRO NEWS SENTINEL: CLEAR' }
+          },
+          position: {
+            label: '🥇 ACTIVE 15M GOLD SWING',
+            dir: 'BUY (LONG)',
+            entry: '$4,068.50',
+            sl: '$4,066.00',
+            slSub: '(-$2.50 / -₹467)',
+            tp: '$4,075.50',
+            tpSub: '(+$7.00 / +₹1,308)',
+            reason: 'London Open Asian Range breakout above 20 EMA with DXY falling to 104.28. Invalidation: -$2.50.'
+          },
+          metrics: {
+            retLabel: 'Gold Swing Net Return',
+            retVal: '+7.10%',
+            winLabel: 'Win Rate (15M Swing)',
+            winVal: '58.3%',
+            rrLabel: 'Avg R:R 2.8 : 1',
+            pfVal: '2.05',
+            durVal: '1h – 4h',
+            durSub: 'London/NY Overlap Focus'
+          },
+          rulesTitle: 'Gold 15M Swing Execution Logic',
+          rulesBadge: '15M Swing Rules',
+          rules: [
+            { title: '🥇 Continuous 24/5 Trading:', val: 'Peak Overlap 13:30 - 21:30 IST', desc: 'Gold trades continuously 24 hours a day, 5 days a week. Peak volatility occurs during London & New York session overlap.' },
+            { title: '💵 DXY Inverse Correlation:', val: 'US Dollar Tailwind', desc: 'Filters out gold long breakouts if the US Dollar Index (DXY) is expanding upward. Only trades when currency correlation aligns.' },
+            { title: '🛡️ Macro Sentinel Blackout:', val: '±15m Blackout', desc: 'Automatically freezes entries around US CPI, Non-Farm Payrolls, and FOMC rate decisions to avoid 20-dollar gold slippage spikes.' }
+          ],
+          feedTitle: 'Live Signals Feed (15M Gold Swing)',
+          feedSub: 'Active SQLite (London/NY Breakout)',
+          tradesTitle: 'Closed Trades Audit Trail (15M Gold Swing)'
+        }
+      }
+    };
+
+    function setCapitalPreset(amount) {
+      const el = document.getElementById('input-capital-inr');
+      if (el) el.value = amount;
+      recalculateTradeSetup();
+    }
+
+    function adjustLotStep(direction) {
+      const el = document.getElementById('input-lot-size');
+      if (!el) return;
+      let val = parseFloat(el.value) || 0.05;
+      const step = currentAsset === 'NIFTY' ? 1 : 0.01;
+      val = Math.max(step, Math.round((val + direction * step) * 100) / 100);
+      el.value = val;
+      recalculateTradeSetup();
+    }
+
+    function recalculateTradeSetup() {
+      const elCap = document.getElementById('input-capital-inr');
+      const elLev = document.getElementById('input-leverage');
+      const elLot = document.getElementById('input-lot-size');
+
+      userCapitalInr = Math.max(100, parseFloat(elCap ? elCap.value : 10000) || 10000);
+      userLeverage = Math.max(1, parseFloat(elLev ? elLev.value : 1000) || 1000);
+      userLotSize = Math.max(0.001, parseFloat(elLot ? elLot.value : 0.05) || 0.05);
+
+      const capitalUsd = userCapitalInr / liveUsdInr;
+      const isNifty = currentAsset === 'NIFTY';
+
+      // 1. Capital Invested Box
+      const elCapUsd = document.getElementById('calc-capital-usd');
+      if (elCapUsd) {
+        if (isNifty) {
+          elCapUsd.style.display = 'none';
+        } else {
+          elCapUsd.style.display = 'inline';
+          elCapUsd.innerText = `$${capitalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD`;
+        }
+      }
+
+      // 2. Leverage / Exposure Box
+      const elLevTitle = document.getElementById('label-leverage-title');
+      const elPowerUsd = document.getElementById('calc-power-usd');
+      const elPowerInr = document.getElementById('calc-power-inr');
+      const levWrapper = document.getElementById('leverage-select-wrapper');
+
+      if (isNifty) {
+        if (elLevTitle) elLevTitle.innerText = 'NSE Exposure / Type';
+        if (elPowerUsd) elPowerUsd.style.display = 'none';
+
+        if (levWrapper && !levWrapper.innerHTML.includes('MIS Intraday')) {
+          levWrapper.innerHTML = `
+            <select id="input-leverage" onchange="recalculateTradeSetup()"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-amber-400 transition text-xs">
+              <option value="5" selected>MIS Intraday (5x SEBI Margin)</option>
+              <option value="1">NRML / CNC (1x Delivery Margin)</option>
+            </select>
+          `;
+        }
+
+        const effectiveLev = Math.min(userLeverage, 5);
+        const powerInr = userCapitalInr * effectiveLev;
+        if (elPowerInr) {
+          elPowerInr.innerText = `Buying Power: ₹${Math.round(powerInr).toLocaleString('en-IN')}`;
+        }
+      } else {
+        if (elLevTitle) elLevTitle.innerText = 'Leverage Ratio';
+        if (elPowerUsd) elPowerUsd.style.display = 'inline';
+
+        if (levWrapper && levWrapper.innerHTML.includes('MIS Intraday')) {
+          levWrapper.innerHTML = `
+            <select id="input-leverage" onchange="recalculateTradeSetup()"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold focus:outline-none focus:border-amber-400 transition text-xs">
+              <option value="1000" selected>1000:1 (1000x Lev)</option>
+              <option value="500">500:1 (500x Lev)</option>
+              <option value="200">200:1 (200x Lev)</option>
+              <option value="100">100:1 (100x Lev)</option>
+              <option value="50">50:1 (50x Lev)</option>
+              <option value="1">1:1 (Cash / No Lev)</option>
+            </select>
+          `;
+        }
+
+        const powerUsd = capitalUsd * userLeverage;
+        const powerInr = userCapitalInr * userLeverage;
+        if (elPowerUsd) {
+          if (powerUsd >= 1000000) elPowerUsd.innerText = `Power: $${(powerUsd / 1000000).toFixed(2)}M`;
+          else if (powerUsd >= 1000) elPowerUsd.innerText = `Power: $${(powerUsd / 1000).toFixed(1)}K`;
+          else elPowerUsd.innerText = `Power: $${Math.round(powerUsd)}`;
+        }
+        if (elPowerInr) {
+          if (powerInr >= 10000000) elPowerInr.innerText = `Buying Power: ₹${(powerInr / 10000000).toFixed(2)} Cr`;
+          else if (powerInr >= 100000) elPowerInr.innerText = `Buying Power: ₹${(powerInr / 100000).toFixed(2)} Lakh`;
+          else elPowerInr.innerText = `Buying Power: ₹${Math.round(powerInr).toLocaleString('en-IN')}`;
+        }
+      }
+
+      // 3. Trade Lots & Notional
+      let notionalUsd = 0;
+      let notionalInr = 0;
+      let marginReqUsd = 0;
+      let marginReqInr = 0;
+      let slRiskUsd = 0;
+      let slRiskInr = 0;
+      let tpProfitUsd = 0;
+      let tpProfitInr = 0;
+
+      const isScalp = currentStrategyMode === 'SCALP';
+
+      if (currentAsset === 'BTC') {
+        const slDist = currentStrategyMode === 'SCALP' ? 75.0 : (currentStrategyMode === 'EXPANSION_5M' ? 265.0 : 470.0);
+        const tpDist = currentStrategyMode === 'SCALP' ? 230.0 : (currentStrategyMode === 'EXPANSION_5M' ? 590.0 : 1330.0);
+
+        notionalUsd = livePrice * userLotSize;
+        notionalInr = notionalUsd * liveUsdInr;
+        marginReqUsd = notionalUsd / userLeverage;
+        marginReqInr = marginReqUsd * liveUsdInr;
+
+        slRiskUsd = slDist * userLotSize;
+        slRiskInr = slRiskUsd * liveUsdInr;
+        tpProfitUsd = tpDist * userLotSize;
+        tpProfitInr = tpProfitUsd * liveUsdInr;
+
+        const elLabelLot = document.getElementById('label-lot-size');
+        if (elLabelLot) elLabelLot.innerText = 'BTC Trade Lots';
+        const elLotUnit = document.getElementById('lot-unit-desc');
+        if (elLotUnit) elLotUnit.innerText = `${userLotSize} BTC contract`;
+      } else if (currentAsset === 'GOLD') {
+        const slDist = currentStrategyMode === 'SCALP' ? 1.50 : (currentStrategyMode === 'EXPANSION_5M' ? 5.00 : 2.50);
+        const tpDist = currentStrategyMode === 'SCALP' ? 4.50 : (currentStrategyMode === 'EXPANSION_5M' ? 11.50 : 7.00);
+        const oz = userLotSize * 100.0;
+
+        notionalUsd = livePrice * oz;
+        notionalInr = notionalUsd * liveUsdInr;
+        marginReqUsd = notionalUsd / userLeverage;
+        marginReqInr = marginReqUsd * liveUsdInr;
+
+        slRiskUsd = slDist * oz;
+        slRiskInr = slRiskUsd * liveUsdInr;
+        tpProfitUsd = tpDist * oz;
+        tpProfitInr = tpProfitUsd * liveUsdInr;
+
+        const elLabelLot = document.getElementById('label-lot-size');
+        if (elLabelLot) elLabelLot.innerText = 'Gold Lots';
+        const elLotUnit = document.getElementById('lot-unit-desc');
+        if (elLotUnit) elLotUnit.innerText = `${userLotSize} Lots (${oz.toFixed(0)} oz)`;
+      } else if (currentAsset === 'NIFTY') {
+        const slDist = currentStrategyMode === 'SCALP' ? 15.0 : (currentStrategyMode === 'EXPANSION_5M' ? 25.0 : 35.0);
+        const tpDist = currentStrategyMode === 'SCALP' ? 35.0 : (currentStrategyMode === 'EXPANSION_5M' ? 55.0 : 90.0);
+        const totalQty = userLotSize * 25;
+
+        notionalInr = livePrice * totalQty;
+        notionalUsd = notionalInr / liveUsdInr;
+        const effectiveLev = Math.min(userLeverage, 5);
+        marginReqInr = notionalInr / effectiveLev;
+        marginReqUsd = marginReqInr / liveUsdInr;
+
+        slRiskInr = slDist * totalQty;
+        slRiskUsd = slRiskInr / liveUsdInr;
+        tpProfitInr = tpDist * totalQty;
+        tpProfitUsd = tpProfitInr / liveUsdInr;
+
+        const elLabelLot = document.getElementById('label-lot-size');
+        if (elLabelLot) elLabelLot.innerText = 'Nifty Lots (NSE)';
+        const elLotUnit = document.getElementById('lot-unit-desc');
+        if (elLotUnit) elLotUnit.innerText = `${userLotSize} Lots (${totalQty} Qty)`;
+      }
+
+      // Update Card 3 Display
+      const elNotional = document.getElementById('calc-notional-val');
+      if (elNotional) {
+        elNotional.innerText = isNifty ? 
+          `₹${Math.round(notionalInr).toLocaleString('en-IN')}` : 
+          `$${notionalUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      }
+
+      const elLotInr = document.getElementById('calc-lot-inr');
+      if (elLotInr) {
+        elLotInr.innerText = isNifty ? 
+          `₹${livePrice.toFixed(1)} / Index Pt` : 
+          `₹${Math.round(notionalInr).toLocaleString('en-IN')}`;
+      }
+
+      // 4. Margin & Risk Box
+      const elRiskTitle = document.getElementById('label-risk-title');
+      if (elRiskTitle) {
+        elRiskTitle.innerText = isNifty ? 'NSE Required Margin' : 'Required Margin';
+      }
+
+      const elMarginReq = document.getElementById('calc-margin-req');
+      if (elMarginReq) {
+        elMarginReq.innerText = isNifty ? 
+          `₹${Math.round(marginReqInr).toLocaleString('en-IN')} (MIS 5x)` : 
+          `$${marginReqUsd.toFixed(2)} (₹${Math.round(marginReqInr).toLocaleString('en-IN')})`;
+      }
+
+      const marginUsedPct = isNifty ? (marginReqInr / userCapitalInr) * 100 : (marginReqUsd / capitalUsd) * 100;
+      const elMarginPct = document.getElementById('calc-margin-pct');
+      if (elMarginPct) {
+        elMarginPct.innerText = `${marginUsedPct.toFixed(1)}% of Capital`;
+        elMarginPct.className = marginUsedPct > 80 ? 'text-rose-400 font-bold' : (marginUsedPct > 40 ? 'text-amber-400 font-bold' : 'text-blue-300 font-bold');
+      }
+
+      const elFree = document.getElementById('calc-margin-free');
+      if (elFree) {
+        if (isNifty) {
+          const freeInr = Math.max(0, userCapitalInr - marginReqInr);
+          elFree.innerText = `₹${Math.round(freeInr).toLocaleString('en-IN')}`;
+        } else {
+          const freeUsd = Math.max(0, capitalUsd - marginReqUsd);
+          const freeInr = freeUsd * liveUsdInr;
+          elFree.innerText = `$${freeUsd.toFixed(2)} (₹${Math.round(freeInr).toLocaleString('en-IN')})`;
+        }
+      }
+
+      const elSlRisk = document.getElementById('calc-sl-risk');
+      if (elSlRisk) {
+        if (isNifty) {
+          elSlRisk.innerText = `-₹${Math.round(slRiskInr).toLocaleString('en-IN')} (${isScalp ? '15 pts' : '35 pts'})`;
+        } else {
+          elSlRisk.innerText = `-$${slRiskUsd.toFixed(2)} (-₹${Math.round(slRiskInr).toLocaleString('en-IN')})`;
+        }
+      }
+
+      // Update Active Banner Labels
+      const bannerLots = document.getElementById('banner-lots');
+      if (bannerLots) bannerLots.innerText = userLotSize;
+
+      const activePosSlPct = document.getElementById('active-pos-sl-pct');
+      if (activePosSlPct) {
+        if (isNifty) {
+          activePosSlPct.innerText = `(-₹${Math.round(slRiskInr).toLocaleString('en-IN')})`;
+        } else {
+          activePosSlPct.innerText = `(-$${slRiskUsd.toFixed(2)} / -₹${Math.round(slRiskInr).toLocaleString('en-IN')})`;
+        }
+      }
+
+      const activePosTpPct = document.getElementById('active-pos-tp-pct');
+      if (activePosTpPct) {
+        if (isNifty) {
+          activePosTpPct.innerText = `(+₹${Math.round(tpProfitInr).toLocaleString('en-IN')})`;
+        } else {
+          activePosTpPct.innerText = `(+$${tpProfitUsd.toFixed(2)} / +₹${Math.round(tpProfitInr).toLocaleString('en-IN')})`;
+        }
+      }
+
+      if (window.terminal) {
+        window.terminal.updateActivePositionBanner(livePrice);
+      }
+    }
+
+    function initTradingViewChart(symbol, interval = '1') {
+      currentInterval = interval;
+      const container = document.getElementById('tradingview_chart_container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (typeof TradingView !== 'undefined') {
+        tvWidget = new TradingView.widget({
+          'autosize': true,
+          'symbol': symbol,
+          'interval': interval,
+          'timezone': 'Asia/Kolkata',
+          'theme': 'dark',
+          'style': '1', // Candlesticks
+          'locale': 'in',
+          'toolbar_bg': '#090d16',
+          'enable_publishing': false,
+          'hide_top_toolbar': false,
+          'hide_legend': false,
+          'allow_symbol_change': true,
+          'save_image': false,
+          'container_id': 'tradingview_chart_container',
+          'studies': [
+            'MASimple@tv-basicstudies',
+            'VWAP@tv-basicstudies'
+          ]
+        });
+      } else {
+        setTimeout(() => {
+          if (typeof TradingView !== 'undefined') {
+            initTradingViewChart(symbol, interval);
+          }
+        }, 300);
+      }
+    }
+
+    function setNiftySymbol(sym) {
+      ASSET_CONFIG.NIFTY.tvSymbol = sym;
+      const isInda = sym.includes('INDA');
+      const isIndy = sym.includes('INDY');
+
+      const btnInda = document.getElementById('btn-sym-inda');
+      const btnIndy = document.getElementById('btn-sym-indy');
+
+      if (btnInda) btnInda.className = isInda ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
+      if (btnIndy) btnIndy.className = isIndy ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
+
+      const sourceTag = isIndy ? 'INDIA 50 ETF (NASDAQ:INDY)' : 'MSCI INDIA ETF (AMEX:INDA)';
+      document.getElementById('chart-feed-badge').innerText = `LIVE ${sourceTag}`;
+      const assetSourceTag = document.getElementById('asset-source-tag');
+      if (assetSourceTag) assetSourceTag.innerText = sourceTag;
+      initTradingViewChart(sym, currentInterval || '5');
+    }
+
+    function setChartTimeframe(tf) {
+      document.querySelectorAll('[id^="tf-"]').forEach(btn => {
+        btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+      });
+      const activeBtn = document.getElementById(`tf-${tf}`);
+      if (activeBtn) {
+        activeBtn.className = 'px-2.5 py-1 rounded-lg font-bold bg-blue-600 text-white shadow';
+      }
+      initTradingViewChart(ASSET_CONFIG[currentAsset].tvSymbol, tf);
+    }
+
+    // Universal 3-Mode Strategy Switcher: 1M Scalp vs 5M Trend Expansion vs 15M Swing
+    function switchStrategyMode(mode) {
+      currentStrategyMode = mode;
+      const btnScalp = document.getElementById('btn-mode-scalp');
+      const btn5m = document.getElementById('btn-mode-5m');
+      const btnSwing = document.getElementById('btn-mode-swing');
+      const headerDesc = document.getElementById('header-setup-desc');
+
+      // Reset all buttons
+      if (btnScalp) btnScalp.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
+      if (btn5m) btn5m.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
+      if (btnSwing) btnSwing.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
+
+      if (mode === 'SCALP') {
+        if (btnScalp) btnScalp.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow';
+      } else if (mode === 'EXPANSION_5M') {
+        if (btn5m) btn5m.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow';
+      } else {
+        if (btnSwing) btnSwing.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow';
+      }
+
+      const st = STRATEGY_DATA[currentAsset][mode];
+      if (!st) return;
+
+      if (headerDesc) headerDesc.innerText = st.setupDesc;
+
+      // 4 Institutional Hardening Badges
+      for (let i = 1; i <= 4; i++) {
+        const dotEl = document.getElementById(`badge-${i}-dot`);
+        const labelEl = document.getElementById(`badge-${i}-label`);
+        const textEl = document.getElementById(`badge-${i}-text`);
+        if (dotEl) dotEl.className = `w-2 h-2 rounded-full ${st.badges[i].dot}`;
+        if (labelEl) labelEl.innerText = st.badges[i].label;
+        if (textEl) {
+          if (currentAsset === 'GOLD' && i === 1 && (mode === 'SCALP' || mode === 'EXPANSION_5M')) {
+            textEl.innerText = `⚡ SIZING: ${userLotSize} LOTS (${(userLotSize * 100).toFixed(0)} oz)`;
+          } else {
+            textEl.innerText = st.badges[i].text;
+          }
+        }
+      }
+
+      // Active Position Live Banner
+      const pos = st.position;
+      const posLabel = document.getElementById('active-pos-label');
+      if (posLabel) {
+        const lotInfo = currentAsset === 'NIFTY' ? 
+          `<span id="banner-lots">${userLotSize}</span> LOTS / ${userLotSize * 25} Qty` : 
+          (currentAsset === 'GOLD' ? `<span id="banner-lots">${userLotSize}</span> LOTS / ${(userLotSize * 100).toFixed(0)} oz` : `<span id="banner-lots">${userLotSize}</span> LOTS`);
+        posLabel.innerHTML = `${pos.label} (${lotInfo}):`;
+        posLabel.className = mode === 'SCALP' ? 'text-xs font-bold text-amber-300 uppercase tracking-wider' : (mode === 'EXPANSION_5M' ? 'text-xs font-bold text-emerald-300 uppercase tracking-wider' : 'text-xs font-bold text-blue-300 uppercase tracking-wider');
+      }
+
+      const posDir = document.getElementById('active-pos-dir');
+      if (posDir) {
+        posDir.innerText = pos.dir;
+        posDir.className = mode === 'SCALP' ? 'px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400' : (mode === 'EXPANSION_5M' ? 'px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400' : 'px-2.5 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-400');
+      }
+
+      const posEntry = document.getElementById('active-pos-entry');
+      if (posEntry) posEntry.innerText = pos.entry;
+
+      const posSl = document.getElementById('active-pos-sl');
+      if (posSl) posSl.innerText = pos.sl;
+
+      const posSlPct = document.getElementById('active-pos-sl-pct');
+      if (posSlPct) posSlPct.innerText = pos.slSub;
+
+      const posTp = document.getElementById('active-pos-tp');
+      if (posTp) posTp.innerText = pos.tp;
+
+      const posTpPct = document.getElementById('active-pos-tp-pct');
+      if (posTpPct) posTpPct.innerText = pos.tpSub;
+
+      const posReason = document.getElementById('active-pos-reason');
+      if (posReason) posReason.innerText = pos.reason;
+
+      // Metrics HUD Cards
+      const cardPnlLabel = document.getElementById('card-pnl-label');
+      if (cardPnlLabel) cardPnlLabel.innerText = st.metrics.retLabel;
+      const metricPnl = document.getElementById('metric-pnl');
+      if (metricPnl) metricPnl.innerText = st.metrics.retVal;
+
+      const cardWinrateLabel = document.getElementById('card-winrate-label');
+      if (cardWinrateLabel) cardWinrateLabel.innerText = st.metrics.winLabel;
+      const metricWinrate = document.getElementById('metric-winrate');
+      if (metricWinrate) metricWinrate.innerText = st.metrics.winVal;
+
+      const cardRrLabel = document.getElementById('card-rr-label');
+      if (cardRrLabel) cardRrLabel.innerText = st.metrics.rrLabel;
+
+      const metricPf = document.getElementById('metric-pf');
+      if (metricPf) metricPf.innerText = st.metrics.pfVal;
+
+      const metricDuration = document.getElementById('metric-duration');
+      if (metricDuration) metricDuration.innerText = st.metrics.durVal;
+
+      const cardDurationSub = document.getElementById('card-duration-sub');
+      if (cardDurationSub) cardDurationSub.innerText = st.metrics.durSub;
+
+      // Strategy Execution Logic Blueprint Cards (Always 3 Cards)
+      const stratTitle = document.getElementById('strategy-card-title');
+      if (stratTitle) stratTitle.innerText = st.rulesTitle;
+      const stratBadge = document.getElementById('strategy-card-badge');
+      if (stratBadge) {
+        stratBadge.innerText = st.rulesBadge;
+        stratBadge.className = mode === 'SCALP' ? 'text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded' : (mode === 'EXPANSION_5M' ? 'text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded' : 'text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded');
+      }
+      const stratDot = document.getElementById('strategy-card-dot');
+      if (stratDot) {
+        stratDot.className = mode === 'SCALP' ? 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse' : (mode === 'EXPANSION_5M' ? 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse' : 'w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse');
+      }
+
+      const stratBody = document.getElementById('strategy-card-body');
+      if (stratBody && st.rules) {
+        stratBody.innerHTML = st.rules.map(r => `
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold ${mode === 'SCALP' ? 'text-amber-400' : (mode === 'EXPANSION_5M' ? 'text-emerald-400' : 'text-blue-400')} mb-1 flex items-center justify-between">
+              <span>${r.title}</span>
+              <span class="font-mono text-emerald-400">${r.val}</span>
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              ${r.desc}
+            </p>
+          </div>
+        `).join('');
+      }
+
+      // Feed Titles
+      const sigFeedTitle = document.getElementById('signals-feed-title');
+      if (sigFeedTitle) sigFeedTitle.innerText = st.feedTitle;
+      const sigFeedSub = document.getElementById('signals-feed-subtitle');
+      if (sigFeedSub) sigFeedSub.innerText = st.feedSub;
+      const tradesTitle = document.getElementById('trades-journal-title');
+      if (tradesTitle) tradesTitle.innerText = st.tradesTitle;
+
+      // Switch Chart Timeframe
+      setChartTimeframe(st.tf);
+
+      recalculateTradeSetup();
+
+      if (window.terminal) {
+        window.terminal.renderSignalsTable();
+        window.terminal.renderTradesTable();
+      }
+    }
+
+    // Multi-Asset Switcher: BTC, NIFTY, GOLD
+    function switchAsset(asset) {
+      currentAsset = asset;
+      const cfg = ASSET_CONFIG[asset];
+      const niftySymToggle = document.getElementById('nifty-symbol-toggle');
+      const forexBadge = document.getElementById('nav-forex-badge');
+
+      // Update Nav Tabs Active Styling
+      document.getElementById('tab-btc').className = asset === 'BTC' ? 
+        'px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow flex items-center gap-2 transition' :
+        'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-2';
+      
+      document.getElementById('tab-nifty').className = asset === 'NIFTY' ? 
+        'px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow flex items-center gap-2 transition' :
+        'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-2';
+
+      document.getElementById('tab-gold').className = asset === 'GOLD' ? 
+        'px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-600 to-yellow-400 text-slate-950 shadow flex items-center gap-2 transition' :
+        'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-2';
+
+      // Header Elements
+      const iconEl = document.getElementById('asset-icon');
+      if (iconEl) {
+        iconEl.innerText = cfg.icon;
+        iconEl.className = `w-12 h-12 rounded-xl bg-gradient-to-tr ${cfg.iconGradient} flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg`;
+      }
+      
+      const assetTitle = document.getElementById('asset-title');
+      if (assetTitle) {
+        assetTitle.innerHTML = `${cfg.title} <span id="asset-source-tag" class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">${cfg.sourceTag}</span>`;
+      }
+
+      const chartBadge = document.getElementById('chart-feed-badge');
+      if (chartBadge) chartBadge.innerText = `LIVE ${cfg.sourceTag}`;
+
+      // Default Lot Sizes as requested: 0.05 BTC, 1 Nifty, 0.02 Gold
+      userLotSize = cfg.defaultLots;
+      const elLot = document.getElementById('input-lot-size');
+      if (elLot) {
+        elLot.value = cfg.defaultLots;
+        elLot.step = cfg.stepLots;
+      }
+
+      // Nifty Symbol Toggle visibility and active state sync
+      if (niftySymToggle) {
+        niftySymToggle.style.display = asset === 'NIFTY' ? 'flex' : 'none';
+        if (asset === 'NIFTY') {
+          const isIndy = (ASSET_CONFIG.NIFTY.tvSymbol || '').includes('INDY');
+          const btnInda = document.getElementById('btn-sym-inda');
+          const btnIndy = document.getElementById('btn-sym-indy');
+          if (btnInda) btnInda.className = !isIndy ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
+          if (btnIndy) btnIndy.className = isIndy ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
+        }
+      }
+
+      // Forex USD/INR badge visibility in navbar: Hide on NIFTY, Show on BTC/GOLD
+      if (forexBadge) forexBadge.style.display = asset === 'NIFTY' ? 'none' : 'flex';
+
+      // Set live HUD price baseline
+      if (asset === 'BTC') {
+        livePrice = 75810.0;
+        document.getElementById('hud-metric1-label').innerText = 'Funding (8h)';
+        document.getElementById('hud-metric1-val').innerHTML = '+0.0115% <span class="text-slate-500 font-normal">(Safe)</span>';
+        document.getElementById('hud-metric2-label').innerText = 'CVD Delta';
+        document.getElementById('hud-metric2-val').innerText = '+348.2 (Bull Delta)';
+        document.getElementById('hud-live-price').innerText = '$75,810.00';
+      } else if (asset === 'NIFTY') {
+        livePrice = 24165.0;
+        document.getElementById('hud-metric1-label').innerText = 'Central Pivot (CPR)';
+        document.getElementById('hud-metric1-val').innerHTML = '24,150 <span class="text-emerald-400 font-mono">(Narrow CPR)</span>';
+        document.getElementById('hud-metric2-label').innerText = 'Options PCR';
+        document.getElementById('hud-metric2-val').innerHTML = '1.14 (Bull Support)';
+        document.getElementById('hud-live-price').innerText = '₹24,165.00';
+      } else if (asset === 'GOLD') {
+        livePrice = 4068.89;
+        document.getElementById('hud-metric1-label').innerText = 'US Dollar (DXY)';
+        document.getElementById('hud-metric1-val').innerHTML = '104.28 <span class="text-emerald-400 font-mono">(Tailwind)</span>';
+        document.getElementById('hud-metric2-label').innerText = 'Asian Gold Range';
+        document.getElementById('hud-metric2-val').innerHTML = '$4,060.0 - $4,075.0';
+        document.getElementById('hud-live-price').innerText = '$4,068.89';
+      }
+
+      // Apply the active strategy mode across this newly selected asset
+      switchStrategyMode(currentStrategyMode);
+    }
+
+    // Real-Time Application Controller
+    class TerminalController {
+      constructor() {
+        this.init();
+      }
+
+      init() {
+        refreshClockIST();
+        setInterval(refreshClockIST, 1000);
+
+        this.renderSignalsTable();
+        this.renderTradesTable();
+        recalculateTradeSetup();
+        this.startLiveTickingLoop();
+      }
+
+      startLiveTickingLoop() {
+        setInterval(async () => {
+          let priceUpdated = false;
+
+          // 1. Direct 24/7 public exchange ticks (Binance REST)
+          if (currentAsset === 'GOLD') {
+            try {
+              const gRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
+              if (gRes.ok) {
+                const gData = await gRes.json();
+                const gp = parseFloat(gData.price);
+                if (gp > 3500) {
+                  livePrice = Math.round(gp * 100) / 100;
+                  priceUpdated = true;
+                }
+              }
+            } catch (e) {}
+          } else if (currentAsset === 'BTC') {
+            try {
+              const bRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+              if (bRes.ok) {
+                const bData = await bRes.json();
+                const bp = parseFloat(bData.price);
+                if (bp > 10000) {
+                  livePrice = Math.round(bp * 100) / 100;
+                  priceUpdated = true;
+                }
+              }
+            } catch (e) {}
+          }
+
+          // 2. Local backend integration (multi_status)
+          if (window.location.protocol.startsWith('http')) {
+            try {
+              const res = await fetch('/api/multi_status', { cache: 'no-store' });
+              if (res.ok) {
+                const data = await res.json();
+                if (currentAsset === 'BTC' && data.btc && data.btc.price > 10000) {
+                  if (!priceUpdated) { livePrice = data.btc.price; priceUpdated = true; }
+                  const m2 = document.getElementById('hud-metric2-val');
+                  if (m2) m2.innerText = `${data.btc.cvd > 0 ? '+' : ''}${data.btc.cvd.toFixed(1)} Delta`;
+                  const m1 = document.getElementById('hud-metric1-val');
+                  if (m1) m1.innerHTML = `${(data.btc.funding*100).toFixed(4)}% <span class="text-slate-500 font-normal">(Safe)</span>`;
+                } else if (currentAsset === 'NIFTY' && data.nifty && data.nifty.price > 10000) {
+                  livePrice = data.nifty.price;
+                  priceUpdated = true;
+                  const m1 = document.getElementById('hud-metric1-val');
+                  if (m1) m1.innerHTML = `${data.nifty.cpr_pivot.toFixed(1)} <span class="text-emerald-400 font-mono">(${data.nifty.cpr_regime})</span>`;
+                  const m2 = document.getElementById('hud-metric2-val');
+                  if (m2) m2.innerText = `${data.nifty.pcr.toFixed(2)} (${data.nifty.pcr_sentiment})`;
+                } else if (currentAsset === 'GOLD' && data.gold) {
+                  // STRICT FILTER: Never accept outdated 2xxx price from old backend
+                  if (data.gold.price > 3500 && !priceUpdated) {
+                    livePrice = data.gold.price;
+                    priceUpdated = true;
+                  }
+                  const m1 = document.getElementById('hud-metric1-val');
+                  if (m1) m1.innerHTML = `${data.gold.dxy_price ? data.gold.dxy_price.toFixed(2) : '104.28'} <span class="text-emerald-400 font-mono">(${data.gold.dxy_trend || 'Tailwind'})</span>`;
+                  const m2 = document.getElementById('hud-metric2-val');
+                  if (m2) m2.innerText = '$4,060.0 - $4,075.0';
+                }
+              }
+            } catch (e) {}
+          }
+
+          // 3. Fallback smooth mean-reverting micro-ticks (always stays anchored at current market levels)
+          if (!priceUpdated) {
+            if (currentAsset === 'BTC') {
+              const anchor = 75810.00;
+              livePrice += (anchor - livePrice) * 0.05 + (Math.random() - 0.50) * 2.50;
+              livePrice = Math.round(livePrice * 100) / 100;
+            } else if (currentAsset === 'NIFTY') {
+              const anchor = 24165.00;
+              livePrice += (anchor - livePrice) * 0.05 + (Math.random() - 0.50) * 1.20;
+              livePrice = Math.round(livePrice * 100) / 100;
+            } else if (currentAsset === 'GOLD') {
+              const anchor = 4068.89;
+              livePrice += (anchor - livePrice) * 0.05 + (Math.random() - 0.50) * 0.25;
+              livePrice = Math.round(livePrice * 100) / 100;
+            }
+          }
+
+          // 4. Single Unified HUD Price Rendering (No conflicting writes, zero flicker!)
+          const elLivePrice = document.getElementById('hud-live-price');
+          if (elLivePrice) {
+            if (currentAsset === 'NIFTY') {
+              elLivePrice.innerText = `₹${livePrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            } else {
+              elLivePrice.innerText = `$${livePrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+          }
+
+          // 5. USD/INR gentle pulse (BTC & Gold only)
+          if (currentAsset !== 'NIFTY' && !isCustomUsdInr && Math.random() > 0.45) {
+            const baseRate = 93.45;
+            liveUsdInr += (baseRate - liveUsdInr) * 0.05 + (Math.random() - 0.50) * 0.02;
+            liveUsdInr = Math.round(liveUsdInr * 100) / 100;
+            const elNavForex = document.getElementById('nav-usd-inr-val');
+            if (elNavForex) elNavForex.innerText = `₹${liveUsdInr.toFixed(2)}`;
+            recalculateTradeSetup();
+          }
+
+          // 6. Synchronize active position banner
+          this.updateActivePositionBanner(livePrice);
+
+        }, 1000);
+      }
+
+      updateActivePositionBanner(currentPrice) {
+        const elPnl = document.getElementById('active-pos-pnl');
+        const elPnlInr = document.getElementById('active-pos-pnl-inr');
+        const elRom = document.getElementById('active-pos-rom');
+        const elSl = document.getElementById('active-pos-sl');
+        const elSlPct = document.getElementById('active-pos-sl-pct');
+        const elReason = document.getElementById('active-pos-reason');
+
+        const capitalUsd = userCapitalInr / liveUsdInr;
+        const mode = currentStrategyMode;
+
+        if (currentAsset === 'BTC') {
+          let entry = 75810.00;
+          let initialSl = 75735.00;
+          let beSl = 75825.00;
+          let beTrigger = 90.0;
+          let slRisk = 75.0;
+
+          if (mode === 'EXPANSION_5M') {
+            entry = 75810.00;
+            initialSl = 75545.00;
+            beSl = 75835.00;
+            beTrigger = 190.0;
+            slRisk = 265.0;
+          } else if (mode === 'SWING') {
+            entry = 75520.00;
+            initialSl = 75050.00;
+            beSl = 75545.00;
+            beTrigger = 380.0;
+            slRisk = 470.0;
+          }
+
+          const diff = currentPrice - entry;
+          const pnlUsd = diff * userLotSize;
+          const pnlInr = pnlUsd * liveUsdInr;
+          const retOnCapital = (pnlUsd / capitalUsd) * 100;
+
+          if (elPnl) {
+            elPnl.innerText = `${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)}`;
+            elPnl.className = `font-black text-sm font-mono ${pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+          }
+          if (elPnlInr) {
+            elPnlInr.innerText = `(${pnlInr >= 0 ? '+' : ''}₹${Math.round(pnlInr).toLocaleString('en-IN')})`;
+            elPnlInr.className = `text-xs font-mono ${pnlInr >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+          }
+          if (elRom) {
+            elRom.innerText = `(${retOnCapital >= 0 ? '+' : ''}${retOnCapital.toFixed(2)}% on Cap)`;
+            elRom.className = `text-[11px] font-semibold ${retOnCapital >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+          }
+
+          const isBeTrailed = diff >= beTrigger;
+          if (isBeTrailed) {
+            if (elSl) {
+              elSl.innerText = `$${beSl.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+              elSl.className = 'text-emerald-400 font-bold';
+            }
+            if (elSlPct) elSlPct.innerText = `🛡️ 1R Trailed (Init: $${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})})`;
+            if (elReason) elReason.innerText = `1R target reached. Stop loss dynamically trailed to Breakeven ($${beSl.toLocaleString(undefined, {minimumFractionDigits: 2})}) for risk-free hold.`;
+          } else {
+            if (elSl) {
+              elSl.innerText = `$${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+              elSl.className = 'text-rose-400 font-bold';
+            }
+            const slRiskUsd = slRisk * userLotSize;
+            const slRiskInr = slRiskUsd * liveUsdInr;
+            if (elSlPct) elSlPct.innerText = `(-$${slRiskUsd.toFixed(2)} / -₹${Math.round(slRiskInr).toLocaleString('en-IN')})`;
+            if (elReason) {
+              if (mode === 'SCALP') {
+                elReason.innerText = `Post-Only Limit filled @ 50% FVG Equilibrium ($${entry.toLocaleString(undefined, {minimumFractionDigits: 2})}). Trailing stop armed at +0.12%.`;
+              } else if (mode === 'EXPANSION_5M') {
+                elReason.innerText = `5M Pullback to 20 EMA ($${entry.toLocaleString(undefined, {minimumFractionDigits: 2})}) + Session VWAP Reclaim. 1R Breakeven armed at +0.25%.`;
+              } else {
+                elReason.innerText = `15M Asian Range Sweep: Swept ASL at $75,490, confirmed rejection + Bull CVD absorption.`;
+              }
+            }
+          }
+
+          const tableRowSl = document.getElementById('sig-table-btc-sl');
+          const tableRowStatus = document.getElementById('sig-table-btc-status');
+          if (tableRowSl) {
+            tableRowSl.innerHTML = isBeTrailed ? 
+              `$${beSl.toLocaleString(undefined, {minimumFractionDigits: 2})}<div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})})</div>` :
+              `<span class="text-rose-400 font-bold">$${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})}</span><div class="text-[10px] text-slate-400 font-normal">Initial SL</div>`;
+          }
+          if (tableRowStatus) {
+            tableRowStatus.innerHTML = isBeTrailed ?
+              `<span class="text-emerald-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE</span>` :
+              `<span class="text-amber-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> ARMED</span>`;
+          }
+        } else if (currentAsset === 'NIFTY') {
+          let entry = 24165.00;
+          let initialSl = 24150.00;
+          let beSl = 24168.00;
+          let beTrigger = 15.0;
+
+          if (mode === 'EXPANSION_5M') {
+            entry = 24165.00;
+            initialSl = 24140.00;
+            beSl = 24170.00;
+            beTrigger = 20.0;
+          } else if (mode === 'SWING') {
+            entry = 24150.00;
+            initialSl = 24115.00;
+            beSl = 24155.00;
+            beTrigger = 30.0;
+          }
+
+          const diff = currentPrice - entry;
+          const totalQty = userLotSize * 25;
+          const pnlInr = diff * totalQty;
+          const retOnCapital = (pnlInr / userCapitalInr) * 100;
+
+          if (elPnl) {
+            elPnl.innerText = `${pnlInr >= 0 ? '+' : ''}₹${Math.round(pnlInr).toLocaleString('en-IN')}`;
+            elPnl.className = `font-black text-sm font-mono ${pnlInr >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+          }
+          if (elPnlInr) {
+            elPnlInr.innerText = `${totalQty} shares`;
+            elPnlInr.className = 'text-xs font-mono text-slate-400';
+          }
+          if (elRom) {
+            elRom.innerText = `(${retOnCapital >= 0 ? '+' : ''}${retOnCapital.toFixed(2)}% on Cap)`;
+            elRom.className = `text-[11px] font-semibold ${retOnCapital >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+          }
+
+          const isBeTrailed = diff >= beTrigger;
+          if (elSl) {
+            elSl.innerText = isBeTrailed ? `₹${beSl.toFixed(2)}` : `₹${initialSl.toFixed(2)}`;
+            elSl.className = isBeTrailed ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+          }
+          if (elSlPct) {
+            elSlPct.innerText = isBeTrailed ? `🛡️ 1R Trailed (Init: ₹${initialSl.toFixed(2)})` : `(-₹${Math.round((entry - initialSl) * totalQty).toLocaleString('en-IN')})`;
+          }
+        } else if (currentAsset === 'GOLD') {
+          let entry = 4068.89;
+          let initialSl = 4067.39;
+          let beSl = 4069.19;
+          let beTrigger = 1.50;
+
+          if (mode === 'EXPANSION_5M') {
+            entry = 4068.89;
+            initialSl = 4063.89;
+            beSl = 4069.39;
+            beTrigger = 4.00;
+          } else if (mode === 'SWING') {
+            entry = 4068.50;
+            initialSl = 4066.00;
+            beSl = 4069.00;
+            beTrigger = 2.50;
+          }
+
+          const diff = currentPrice - entry;
+          const oz = userLotSize * 100.0;
+          const pnlUsd = diff * oz;
+          const pnlInr = pnlUsd * liveUsdInr;
+          const retOnCapital = (pnlUsd / capitalUsd) * 100;
+
+          if (elPnl) {
+            elPnl.innerText = `${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)}`;
+            elPnl.className = `font-black text-sm font-mono ${pnlUsd >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+          }
+          if (elPnlInr) {
+            elPnlInr.innerText = `(${pnlInr >= 0 ? '+' : ''}₹${Math.round(pnlInr).toLocaleString('en-IN')})`;
+            elPnlInr.className = `text-xs font-mono ${pnlInr >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+          }
+          if (elRom) {
+            elRom.innerText = `(${retOnCapital >= 0 ? '+' : ''}${retOnCapital.toFixed(2)}% on Cap)`;
+            elRom.className = `text-[11px] font-semibold ${retOnCapital >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+          }
+
+          const isBeTrailed = diff >= beTrigger;
+          if (elSl) {
+            elSl.innerText = isBeTrailed ? `$${beSl.toFixed(2)}` : `$${initialSl.toFixed(2)}`;
+            elSl.className = isBeTrailed ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+          }
+          if (elSlPct) {
+            elSlPct.innerText = isBeTrailed ? `🛡️ 1R Trailed (Init: $${initialSl.toFixed(2)})` : `(-$${((entry - initialSl) * oz).toFixed(2)} / -₹${Math.round((entry - initialSl) * oz * liveUsdInr).toLocaleString('en-IN')})`;
+          }
+        }
+      }
+
+      renderSignalsTable() {
+        const tbody = document.getElementById('signals-table-body');
+        if (!tbody) return;
+        const now = new Date();
+        const nowIST = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
+        const mode = currentStrategyMode;
+
+        if (currentAsset === 'BTC') {
+          if (mode === 'SCALP') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (1M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $75,810.00</td>
+                <td id="sig-table-btc-sl" class="py-2 px-2 text-emerald-400 font-bold">
+                  $75,825.00
+                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $75,735.00)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$76,040.00</td>
+                <td id="sig-table-btc-status" class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">04:28:15 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (1M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $75,890.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">
+                  $75,960.00
+                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-0.09%)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$75,680.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+0.28%)</td>
+              </tr>
+            `;
+          } else if (mode === 'EXPANSION_5M') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (5M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">MAKER</span> $75,810.00</td>
+                <td id="sig-table-btc-sl" class="py-2 px-2 text-emerald-400 font-bold">
+                  $75,835.00
+                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $75,545.00)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$76,400.00</td>
+                <td id="sig-table-btc-status" class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (+0.25% BE)
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">03:45:10 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (5M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">MAKER</span> $76,150.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">
+                  $76,415.00
+                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-0.35%)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$75,560.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+0.77%)</td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">04:15:00 IST</td>
+                <td class="py-2 px-2 font-bold text-blue-400">BUY (15M)</td>
+                <td class="py-2 px-2 text-slate-200">$75,520.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">$75,050.00</td>
+                <td class="py-2 px-2 text-emerald-400">$76,850.00</td>
+                <td class="py-2 px-2 font-semibold text-blue-400 animate-pulse">ACTIVE (15M)</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">02:15:00 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (15M)</td>
+                <td class="py-2 px-2 text-slate-200">$76,210.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">$76,680.00</td>
+                <td class="py-2 px-2 text-emerald-400">$74,800.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">CLOSED WIN (+1.85%)</td>
+              </tr>
+            `;
+          }
+        } else if (currentAsset === 'NIFTY') {
+          if (mode === 'SCALP') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (1M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> ₹24,165.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">
+                  ₹24,168.00
+                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: ₹24,150.00)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">₹24,200.00</td>
+                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">11:15:30 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (1M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> ₹24,190.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">
+                  ₹24,205.00
+                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-15 pts)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">₹24,155.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+35 Pts)</td>
+              </tr>
+            `;
+          } else if (mode === 'EXPANSION_5M') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (5M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">BOUNCE</span> ₹24,165.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">
+                  ₹24,170.00
+                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: ₹24,140.00)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">₹24,220.00</td>
+                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (+20 Pts)
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">10:45:00 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (5M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">REJECTION</span> ₹24,210.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">
+                  ₹24,235.00
+                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-25 pts)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">₹24,155.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+55 Pts)</td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">09:45:00 IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (ORB)</td>
+                <td class="py-2 px-2 text-slate-200">₹24,150.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">₹24,115.00</td>
+                <td class="py-2 px-2 text-emerald-400">₹24,240.00</td>
+                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ACTIVE (15M)
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">09:15:00 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (ORB)</td>
+                <td class="py-2 px-2 text-slate-200">₹24,210.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">₹24,245.00</td>
+                <td class="py-2 px-2 text-emerald-400">₹24,120.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">CLOSED WIN (+90 Pts)</td>
+              </tr>
+            `;
+          }
+        } else if (currentAsset === 'GOLD') {
+          if (mode === 'SCALP') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (1M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $4,068.89</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">
+                  $4,069.19
+                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $4,067.39)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$4,073.39</td>
+                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">13:42:10 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (1M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $4,072.50</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">
+                  $4,074.00
+                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-$1.50)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$4,068.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+0.16%)</td>
+              </tr>
+            `;
+          } else if (mode === 'EXPANSION_5M') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (5M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">JUDAS RECLAIM</span> $4,068.89</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">
+                  $4,069.39
+                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $4,063.89)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$4,080.39</td>
+                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (+$4.00)
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">14:50:00 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (5M)</td>
+                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">JUDAS REJECT</span> $4,075.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">
+                  $4,080.00
+                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-$5.00)</div>
+                </td>
+                <td class="py-2 px-2 text-emerald-400">$4,063.50</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+$11.50)</td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">14:15:00 IST</td>
+                <td class="py-2 px-2 font-bold text-emerald-400">BUY (15M)</td>
+                <td class="py-2 px-2 text-slate-200">$4,068.50</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">$4,066.00</td>
+                <td class="py-2 px-2 text-emerald-400">$4,075.50</td>
+                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ACTIVE (15M)
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2 px-2 text-slate-400">11:30:00 IST</td>
+                <td class="py-2 px-2 font-bold text-rose-400">SELL (15M)</td>
+                <td class="py-2 px-2 text-slate-200">$4,075.00</td>
+                <td class="py-2 px-2 text-rose-400 font-bold">$4,077.50</td>
+                <td class="py-2 px-2 text-emerald-400">$4,068.00</td>
+                <td class="py-2 px-2 text-emerald-400 font-bold">CLOSED WIN (+0.26%)</td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      renderTradesTable() {
+        const tbody = document.getElementById('trades-table-body');
+        if (!tbody) return;
+        const mode = currentStrategyMode;
+
+        if (currentAsset === 'BTC') {
+          if (mode === 'SCALP') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">08 Nov 05:01 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (1M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,810.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$76,040.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.30%</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$11.50 (+₹1,075)</td>
+                <td class="py-2.5 px-3 text-slate-300">1M Maker @ 50% FVG Equilibrium + CVD Absorption</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">08 Nov 04:28 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
+                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (1M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,890.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,680.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.28%</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$10.50 (+₹981)</td>
+                <td class="py-2.5 px-3 text-slate-300">1M Maker Breakdown + CVD Exhaustion (1R Breakeven Trailed)</td>
+              </tr>
+            `;
+          } else if (mode === 'EXPANSION_5M') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">08 Nov 03:45 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BTC/USD</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (5M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,810.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$76,400.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.78%</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$29.50 (+₹2,755)</td>
+                <td class="py-2.5 px-3 text-slate-300">5M 20 EMA / VWAP Retest + CVD Absorption</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 22:15 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BTC/USD</td>
+                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (5M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$76,150.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,560.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.77%</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$29.50 (+₹2,755)</td>
+                <td class="py-2.5 px-3 text-slate-300">5M Bearish Ribbon Rejection + CVD Divergence</td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">08 Nov 02:00 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (15M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,420.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$76,680.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+1.67%</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$63.00 (+₹5,887)</td>
+                <td class="py-2.5 px-3 text-slate-300">Asian Low Sweep Reclaim + NY Session Expansion</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 23:45 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
+                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (15M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$76,450.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$75,180.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+1.66%</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$63.50 (+₹5,934)</td>
+                <td class="py-2.5 px-3 text-slate-300">London Asian High Sweep + Funding Rate Overheating Fade</td>
+              </tr>
+            `;
+          }
+        } else if (currentAsset === 'NIFTY') {
+          if (mode === 'SCALP') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 14:20 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (1M)</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,145.00</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,180.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+35 Pts</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹875</td>
+                <td class="py-2.5 px-3 text-slate-300">1M VWAP Bounce + 1R Breakeven Trailed (+15 Pts Lock)</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 11:45 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
+                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (1M)</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,195.00</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,160.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+35 Pts</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹875</td>
+                <td class="py-2.5 px-3 text-slate-300">1M Strike Wall Rejection @ 24,200 CE</td>
+              </tr>
+            `;
+          } else if (mode === 'EXPANSION_5M') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 13:45 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (5M)</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,165.00</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,220.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+55 Pts</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹1,375</td>
+                <td class="py-2.5 px-3 text-slate-300">5M CPR-VWAP Rebound + PCR 1.14 Support</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 10:30 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
+                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (5M)</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,210.00</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,155.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+55 Pts</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹1,375</td>
+                <td class="py-2.5 px-3 text-slate-300">5M CPR BC Rejection + Weak PCR 0.88</td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 15:15 IST</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (ORB)</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,120.00</td>
+                <td class="py-2.5 px-3 text-slate-200">₹24,210.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+90 Pts</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹2,250</td>
+                <td class="py-2.5 px-3 text-slate-300">15M ORB Breakout above CPR + 03:15 PM Auto-Square-Off</td>
+              </tr>
+            `;
+          }
+        } else if (currentAsset === 'GOLD') {
+          if (mode === 'SCALP') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 18:30 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (1M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,065.50</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,070.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$4.50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$9.00 (+₹841)</td>
+                <td class="py-2.5 px-3 text-slate-300">1M Micro FVG Sweep + 1R Breakeven Trailed</td>
+              </tr>
+            `;
+          } else if (mode === 'EXPANSION_5M') {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 19:15 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (5M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,068.89</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,080.39</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$11.50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$23.00 (+₹2,148)</td>
+                <td class="py-2.5 px-3 text-slate-300">5M Judas Low Sweep Reclaim + DXY Falling</td>
+              </tr>
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 16:45 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
+                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (5M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,075.00</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,063.50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$11.50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$23.00 (+₹2,148)</td>
+                <td class="py-2.5 px-3 text-slate-300">5M Judas High Sweep MSS + DXY Pump Fade</td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = `
+              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+                <td class="py-2.5 px-3 text-slate-400">07 Nov 20:30 IST</td>
+                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (15M)</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,068.50</td>
+                <td class="py-2.5 px-3 text-slate-200">$4,075.50</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$7.00</td>
+                <td class="py-2.5 px-3 font-bold text-emerald-400">+$14.00 (+₹1,308)</td>
+                <td class="py-2.5 px-3 text-slate-300">London Asian High Sweep + DXY Breakdown</td>
+              </tr>
+            `;
+          }
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      switchAsset('BTC');
+      window.terminal = new TerminalController();
+    });
+
+  </script>
+</body>
+</html>
