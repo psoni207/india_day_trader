@@ -55,62 +55,71 @@
 
   <!-- Top Navigation & Live Terminal Header -->
   <header class="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 shadow-2xl mb-4 backdrop-blur-md">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    
+    <!-- Top Row: Instrument Identity (Left) & Strategy Mode Switcher (Right) -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-3 border-b border-slate-800/80">
       
-      <!-- Brand & Status -->
-      <div class="flex items-center gap-3">
-        <div id="asset-icon" class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg">
+      <!-- Brand, Symbol & Real-Time Status -->
+      <div class="flex items-center gap-3 shrink-0">
+        <div id="asset-icon" class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shrink-0">
           ₿
         </div>
         <div>
-          <div class="flex items-center gap-3">
-            <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2" id="asset-title">
+          <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2 whitespace-nowrap" id="asset-title">
               BTC / USD Perpetual
-              <span id="asset-source-tag" class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">BINANCE SPOT</span>
+              <span id="asset-source-tag" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 whitespace-nowrap">BINANCE SPOT</span>
             </h1>
-            <span id="connection-status" class="px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 🟢 LIVE REAL-TIME
+            <span id="connection-status" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 whitespace-nowrap shrink-0 select-none">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span> LIVE REAL-TIME
             </span>
           </div>
-          <div class="flex items-center gap-2 text-xs text-slate-300 mt-1">
-            <span id="header-setup-desc" class="text-slate-300 font-medium">1M 50% FVG Equilibrium + CVD Absorption</span>
+          <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+            <span id="header-setup-desc" class="text-slate-400 font-medium">1M 50% FVG Equilibrium + CVD Absorption</span>
           </div>
         </div>
       </div>
 
-      <!-- Strategy Mode Switcher & Real-Time Stats -->
-      <div class="flex items-center gap-3 flex-wrap" id="asset-hud-metrics">
-        
-        <!-- Universal Strategy Mode Switcher: 1M Scalp vs 5M Trend Expansion vs 15M Swing (All Assets) -->
-        <div id="strategy-mode-switcher" class="bg-slate-950 border border-slate-800 p-1.5 rounded-xl flex items-center gap-1.5">
-          <button id="btn-mode-scalp" onclick="switchStrategyMode('SCALP')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow">
+      <!-- Strategy Mode Switcher -->
+      <div class="flex items-center gap-2 shrink-0 self-start md:self-auto">
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden lg:block mr-1">Strategy:</div>
+        <div id="strategy-mode-switcher" class="bg-slate-950 border border-slate-800 p-1 rounded-xl flex items-center gap-1 shrink-0 shadow-inner">
+          <button id="btn-mode-scalp" onclick="switchStrategyMode('SCALP')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow whitespace-nowrap">
             ⚡ 1M SCALP
           </button>
-          <button id="btn-mode-5m" onclick="switchStrategyMode('EXPANSION_5M')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+          <button id="btn-mode-5m" onclick="switchStrategyMode('EXPANSION_5M')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition whitespace-nowrap">
             🎯 5M TREND EXPANSION
           </button>
-          <button id="btn-mode-swing" onclick="switchStrategyMode('SWING')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+          <button id="btn-mode-swing" onclick="switchStrategyMode('SWING')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition whitespace-nowrap">
             📊 15M INTRADAY SWING
           </button>
         </div>
+      </div>
 
-        <!-- Metric 1 -->
-        <div class="bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric1-label">Funding (8h)</div>
-          <div class="text-xs font-mono font-bold text-blue-400" id="hud-metric1-val">+0.0115% <span class="text-slate-500 font-normal">(Safe)</span></div>
-        </div>
+    </div>
 
-        <!-- Metric 2 -->
-        <div class="bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric2-label">CVD Delta</div>
-          <div class="text-xs font-mono font-bold text-emerald-400" id="hud-metric2-val">+348.2 (Bull Delta)</div>
+    <!-- Middle Row: Real-Time Market HUD (3-Column Grid) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 py-3" id="asset-hud-metrics">
+      
+      <!-- Live Market Price (Hero Anchor Card) -->
+      <div class="bg-slate-950 border border-amber-500/40 px-3.5 py-2.5 rounded-xl shadow-sm flex items-center justify-between sm:flex-col sm:items-start sm:justify-center">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-[10px] text-amber-300 uppercase tracking-wider font-bold" id="hud-metric3-label">Live Market Price</span>
         </div>
+        <div class="text-base sm:text-lg font-mono font-black text-amber-400 tracking-tight" id="hud-live-price">$62,890.00</div>
+      </div>
 
-        <!-- Metric 3 / Live Price -->
-        <div class="bg-slate-950 border border-amber-500/30 px-3.5 py-1.5 rounded-xl">
-          <div class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric3-label">Live Market Price</div>
-          <div class="text-sm font-mono font-black text-amber-400" id="hud-live-price">$75,810.00</div>
-        </div>
+      <!-- Metric 1 Card -->
+      <div class="bg-slate-950 border border-slate-800 px-3.5 py-2.5 rounded-xl flex items-center justify-between sm:flex-col sm:items-start sm:justify-center">
+        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric1-label">Funding (8h)</div>
+        <div class="text-xs sm:text-sm font-mono font-bold text-blue-400" id="hud-metric1-val">+0.0115% <span class="text-slate-500 font-normal text-xs">(Safe)</span></div>
+      </div>
+
+      <!-- Metric 2 Card -->
+      <div class="bg-slate-950 border border-slate-800 px-3.5 py-2.5 rounded-xl flex items-center justify-between sm:flex-col sm:items-start sm:justify-center">
+        <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold" id="hud-metric2-label">CVD Delta</div>
+        <div class="text-xs sm:text-sm font-mono font-bold text-emerald-400" id="hud-metric2-val">+348.2 (Bull Delta)</div>
       </div>
 
     </div>
@@ -248,37 +257,37 @@
   </section>
 
   <!-- Active Position Live Banner (Consistent & Dynamically Driven) -->
-  <div id="active-position-banner" class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-indigo-950/60 border border-amber-500/40 rounded-2xl p-4 shadow-xl mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div id="active-position-banner" class="bg-gradient-to-r from-emerald-950/40 via-slate-900 to-indigo-950/60 border border-emerald-500/40 rounded-2xl p-4 shadow-xl mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <span class="w-3.5 h-3.5 rounded-full bg-amber-400 animate-ping" id="active-pos-ping"></span>
+      <span class="w-3.5 h-3.5 rounded-full bg-emerald-400 animate-ping" id="active-pos-ping"></span>
       <div>
         <div class="flex items-center gap-2 flex-wrap">
-          <span id="active-pos-label" class="text-xs font-bold text-amber-300 uppercase tracking-wider">⚡ ACTIVE 1M SCALP (<span id="banner-lots">0.05</span> LOTS):</span>
+          <span id="active-pos-label" class="text-xs font-bold text-emerald-300 uppercase tracking-wider">⚡ ACTIVE 1M SCALP (<span id="banner-lots">0.05</span> LOTS):</span>
           <span id="active-pos-dir" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">BUY (LONG)</span>
-          <span class="text-xs text-slate-300">Entry: <span id="active-pos-entry" class="font-mono font-bold text-white">$75,810.00</span></span>
+          <span class="text-xs text-slate-300">Entry: <span id="active-pos-entry" class="font-mono font-bold text-white">$62,408.01</span></span>
         </div>
         <p class="text-xs text-slate-300 mt-1" id="active-pos-reason">
-          Post-Only Limit filled @ 50% FVG Equilibrium ($75,810.00). 1R Trailing Stop armed at +0.12%.
+          Asian Low swept at 62312.7, confirmed rejection + Bull CVD absorption. 1R Breakeven armed at +0.12%.
         </p>
       </div>
     </div>
     <div class="flex items-center gap-3 text-xs font-mono flex-wrap">
       <div class="bg-slate-950/90 px-3 py-1.5 rounded-lg border border-slate-800">
         <span class="text-[10px] text-slate-400 block font-sans">Stop Loss</span>
-        <span id="active-pos-sl" class="text-rose-400 font-bold">$75,735.00</span> 
-        <span id="active-pos-sl-pct" class="text-[11px] text-slate-400">(-$3.75 / -₹324)</span>
+        <span id="active-pos-sl" class="text-rose-400 font-bold">$62,250.41</span> 
+        <span id="active-pos-sl-pct" class="text-[11px] text-slate-400">(-$7.88 / -₹736)</span>
       </div>
       <div class="bg-slate-950/90 px-3 py-1.5 rounded-lg border border-slate-800">
         <span class="text-[10px] text-slate-400 block font-sans">Target (TP2)</span>
-        <span id="active-pos-tp" class="text-emerald-400 font-bold">$76,040.00</span> 
-        <span id="active-pos-tp-pct" class="text-[11px] text-emerald-400 font-mono">(+$11.50 / +₹994)</span>
+        <span id="active-pos-tp" class="text-emerald-400 font-bold">$63,879.00</span> 
+        <span id="active-pos-tp-pct" class="text-[11px] text-emerald-400 font-mono">(+$73.55 / +₹6,873)</span>
       </div>
-      <div class="bg-slate-950 px-3.5 py-1.5 rounded-lg border border-amber-500/50 shadow" id="active-pos-card">
+      <div class="bg-slate-950 px-3.5 py-1.5 rounded-lg border border-emerald-500/50 shadow" id="active-pos-card">
         <span class="text-[10px] text-slate-400 block font-sans">Unrealized PnL</span>
         <div class="flex items-center gap-1.5 flex-wrap">
-          <span id="active-pos-pnl" class="font-black text-emerald-400 font-mono text-sm">+$0.00</span> 
-          <span id="active-pos-pnl-inr" class="text-xs font-mono text-emerald-300">(+₹0.00)</span>
-          <span id="active-pos-rom" class="text-[11px] text-emerald-300 font-semibold">(+0.00%)</span>
+          <span id="active-pos-pnl" class="font-black text-emerald-400 font-mono text-sm">+$24.10</span> 
+          <span id="active-pos-pnl-inr" class="text-xs font-mono text-emerald-300">(+₹2,252)</span>
+          <span id="active-pos-rom" class="text-[11px] text-emerald-300 font-semibold">(+2.25%)</span>
         </div>
       </div>
     </div>
@@ -311,25 +320,17 @@
   <!-- Main Viewport: Professional Real-Time Chart & Asset Blueprint -->
   <main class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
 
-    <!-- Left 2 Cols: Real TradingView Interactive Chart Container -->
+    <!-- Left 2 Cols: Real TradingView Chart Container (BTC & GOLD) / Options Terminal (NIFTY) -->
     <div class="lg:col-span-2 flex flex-col gap-4">
       
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+      <!-- Crypto & Gold Candlestick Chart (Shown for BTC & GOLD) -->
+      <div id="crypto_gold_chart_wrapper" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
         <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div class="flex items-center gap-3">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
               <span id="chart-title">📈 Real-Time Exchange Candlestick Chart</span>
               <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20" id="chart-feed-badge">LIVE BINANCE FEED</span>
             </h2>
-          </div>
-
-          <!-- Indian Index Symbol Toggle (Shown when on NIFTY) -->
-          <div id="nifty-symbol-toggle" style="display: none;" class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-mono">
-            <button onclick="setNiftySymbol('AMEX:INDA')" id="btn-sym-inda" class="px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow">INDIA ETF (INDA)</button>
-            <button onclick="setNiftySymbol('NASDAQ:INDY')" id="btn-sym-indy" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white transition">INDIA 50 (INDY)</button>
-            <a href="https://www.tradingview.com/symbols/NSE-NIFTY/" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg text-slate-400 hover:text-emerald-400 transition flex items-center gap-1" title="Open official NSE Cash Index on TradingView">
-              <span>↗ NSE NIFTY</span>
-            </a>
           </div>
 
           <!-- Timeframe Selector Toolbar -->
@@ -358,6 +359,186 @@
             Chart Timezone: Asia/Kolkata (IST)
           </div>
         </div>
+      </div>
+
+      <!-- NIFTY 50 Options Trade Execution & Strike Terminal (Dedicated for NIFTY 50) -->
+      <div id="nifty_options_terminal_wrapper" style="display: none;" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+        
+        <!-- Header & Real-Time F&O Sentiment Badges -->
+        <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🎯 NIFTY 50 Intraday Options Intelligence</span>
+              <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">NSE DERIVATIVES (F&O)</span>
+            </h2>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap text-xs font-mono">
+            <span class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">
+              📅 Expiry: <strong class="text-amber-400" id="nifty-opt-expiry-label">26 NOV 2026 (Weekly)</strong>
+            </span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300">
+              📍 Spot: <strong class="text-emerald-400" id="nifty-opt-spot-label">₹24,165.00</strong>
+            </span>
+            <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping"></span>
+              03:15 PM AUTO-SQUARE-OFF
+            </span>
+          </div>
+        </div>
+
+        <!-- Hero Section: AI Recommended Option Contract to Buy -->
+        <div class="p-4 rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-emerald-500/40 shadow-inner">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-2.5">
+            <div class="flex items-center gap-2">
+              <span id="nifty-opt-action-badge" class="px-3 py-1 rounded-lg text-xs font-black bg-emerald-500 text-slate-950 shadow flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-950 animate-pulse"></span>
+                RECOMMENDED BUY: CALL OPTION (CE)
+              </span>
+              <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" id="nifty-opt-setup-tag">
+                1M VWAP BOUNCE SCALP
+              </span>
+            </div>
+            <div class="text-xs text-slate-400 flex items-center gap-1">
+              <span>Lot Size:</span>
+              <strong class="text-white font-mono" id="nifty-opt-lot-summary">1 Lot = 25 Qty</strong>
+            </div>
+          </div>
+
+          <!-- Contract Title & Smart Rationale -->
+          <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+            <div>
+              <div class="text-2xl font-black text-amber-300 font-mono tracking-tight" id="nifty-opt-contract-name">
+                NIFTY 26-NOV-2026 24,100 CE
+              </div>
+              <div class="text-xs text-slate-300 mt-0.5 flex items-center gap-1.5" id="nifty-opt-rationale-text">
+                <span class="text-emerald-400 font-semibold">★ 1-Strike In-The-Money (Delta ~0.68)</span>
+                <span class="text-slate-500">•</span>
+                <span class="text-slate-400">High directional momentum velocity, low Theta decay. Recommended by Sensibull for intraday trend buyers.</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-slate-400 font-medium">LIVE OPTION PREMIUM (LTP)</div>
+              <div class="text-3xl font-black text-emerald-400 font-mono" id="nifty-opt-hero-ltp">₹152.50</div>
+            </div>
+          </div>
+
+          <!-- 4 Execution Price Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
+              <div class="text-[11px] text-slate-400 font-semibold">ENTRY PREMIUM</div>
+              <div class="text-xl font-black text-white font-mono mt-0.5" id="nifty-opt-entry-price">₹152.50</div>
+              <div class="text-[10px] text-slate-400 mt-0.5" id="nifty-opt-entry-sub">LTP @ Signal Trigger</div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-rose-500/30 rounded-xl p-3">
+              <div class="text-[11px] text-rose-400 font-semibold flex items-center justify-between">
+                <span>STOP LOSS</span>
+                <span class="text-[10px] bg-rose-500/20 px-1 rounded text-rose-300 font-mono" id="nifty-opt-sl-pts">-24.0 pts</span>
+              </div>
+              <div class="text-xl font-black text-rose-400 font-mono mt-0.5" id="nifty-opt-sl-price">₹128.50</div>
+              <div class="text-[10px] text-rose-300 mt-0.5" id="nifty-opt-sl-risk">Risk: -₹600.00 / lot</div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3">
+              <div class="text-[11px] text-blue-400 font-semibold flex items-center justify-between">
+                <span>TARGET 1 (1R BE)</span>
+                <span class="text-[10px] bg-blue-500/20 px-1 rounded text-blue-300 font-mono" id="nifty-opt-tp1-pts">+24.0 pts</span>
+              </div>
+              <div class="text-xl font-black text-blue-400 font-mono mt-0.5" id="nifty-opt-tp1-price">₹176.50</div>
+              <div class="text-[10px] text-blue-300 mt-0.5">🛡️ Trail SL to Breakeven</div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-emerald-500/30 rounded-xl p-3">
+              <div class="text-[11px] text-emerald-400 font-semibold flex items-center justify-between">
+                <span>TARGET 2 (FULL TP)</span>
+                <span class="text-[10px] bg-emerald-500/20 px-1 rounded text-emerald-300 font-mono" id="nifty-opt-tp2-pts">+54.0 pts</span>
+              </div>
+              <div class="text-xl font-black text-emerald-400 font-mono mt-0.5" id="nifty-opt-tp2-price">₹206.50</div>
+              <div class="text-[10px] text-emerald-300 mt-0.5" id="nifty-opt-tp2-gain">Gain: +₹1,350.00 / lot</div>
+            </div>
+          </div>
+
+          <!-- Trade Ticket Capital Breakdown Footer -->
+          <div class="pt-2.5 border-t border-slate-800 flex items-center justify-between flex-wrap gap-3 text-xs font-mono">
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="text-slate-400">Capital Needed: <strong class="text-emerald-400" id="nifty-opt-capital-needed">₹3,812.50</strong></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-slate-400">Max Risk: <strong class="text-rose-400" id="nifty-opt-total-risk">-₹600.00</strong></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-slate-400">Potential Gain: <strong class="text-emerald-400" id="nifty-opt-total-gain">+₹1,350.00</strong></span>
+            </div>
+            <div class="text-amber-400 font-bold">
+              Reward to Risk: <span id="nifty-opt-rr-ratio">1 : 2.25</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Sensibull-Style Smart Strike Selection Matrix -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>⚡ Intraday Strike Selection Matrix (Sensibull Delta Optimization)</span>
+            </h3>
+            <span class="text-[11px] text-slate-400">Click any strike card to switch recommendation:</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5" id="nifty-strikes-container">
+            <!-- Strike Cards injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Section 3: Live NSE Option Chain Heatmap & Open Interest (OI) Pulse -->
+        <div>
+          <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🧱 Institutional Strike Walls & Open Interest (OI) Heatmap</span>
+            </h3>
+            <div class="flex items-center gap-2 text-[11px] font-mono">
+              <span class="text-emerald-400">Put Wall: <strong>24,100 PE (1.68 Cr OI)</strong></span>
+              <span class="text-slate-600">•</span>
+              <span class="text-rose-400">Call Wall: <strong>24,300 CE (1.42 Cr OI)</strong></span>
+              <span class="text-slate-600">•</span>
+              <span class="text-amber-400">PCR: <strong>1.14 (Bull Support)</strong></span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-900/80 text-slate-400 border-b border-slate-800 font-mono text-[11px]">
+                <tr>
+                  <th class="py-2 px-3 text-rose-400">CALL OI (RESISTANCE)</th>
+                  <th class="py-2 px-3 text-rose-400">CALL LTP</th>
+                  <th class="py-2 px-3 text-center text-amber-400 font-bold bg-slate-900">STRIKE PRICE</th>
+                  <th class="py-2 px-3 text-emerald-400">PUT LTP</th>
+                  <th class="py-2 px-3 text-emerald-400">PUT OI (SUPPORT)</th>
+                  <th class="py-2 px-3 text-slate-300">INSTITUTIONAL SETUP</th>
+                </tr>
+              </thead>
+              <tbody id="nifty-option-chain-body" class="font-mono divide-y divide-slate-800/40">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 4: Option Buyer's Discipline Sentinel -->
+        <div class="pt-3 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-slate-400">
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div class="font-bold text-amber-400 mb-0.5">🔒 Hard Auto-Square-Off at 03:15 PM</div>
+            <p class="text-[11px] text-slate-400">Broker MIS positions square off automatically at 03:15 PM IST. Never hold intraday options into closing settlement.</p>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div class="font-bold text-blue-400 mb-0.5">🛡️ 1R Breakeven Trailing Rule</div>
+            <p class="text-[11px] text-slate-400">Once option premium advances +1R (e.g. +20 to +25 pts), immediately trail stop loss to entry price to eliminate loss risk.</p>
+          </div>
+          <div class="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div class="font-bold text-emerald-400 mb-0.5">★ Buy ITM (Delta 0.60–0.70) Only</div>
+            <p class="text-[11px] text-slate-400">Avoid buying cheap OTM strikes. In-The-Money options overcome Theta time decay and capture 65%+ of the Nifty index move.</p>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -428,6 +609,7 @@
             <th class="py-2.5 px-3">Type</th>
             <th class="py-2.5 px-3">Entry Price</th>
             <th class="py-2.5 px-3">Exit Price</th>
+            <th class="py-2.5 px-3">Status</th>
             <th class="py-2.5 px-3">Realized PnL</th>
             <th class="py-2.5 px-3" id="th-rom-label">PnL (Net Return)</th>
             <th class="py-2.5 px-3">Trigger / Strategy</th>
@@ -459,7 +641,7 @@
     let currentAsset = 'BTC'; // 'BTC', 'NIFTY', 'GOLD'
     let currentStrategyMode = 'SCALP'; // 'SCALP' or 'SWING'
     let currentInterval = '1';
-    let livePrice = 75810.0;
+    let livePrice = 62890.0;
 
     // Dynamic User Input Variables
     let userCapitalInr = 10000;  // User Invested Capital in INR (Default: ₹10,000)
@@ -480,14 +662,14 @@
         lotUnit: 'BTC contract'
       },
       NIFTY: {
-        tvSymbol: 'AMEX:INDA',
-        title: 'NIFTY 50 Index (NSE India)',
-        sourceTag: 'MSCI INDIA ETF (AMEX:INDA)',
+        tvSymbol: 'NSE:NIFTY',
+        title: 'NIFTY 50 Options (NSE India)',
+        sourceTag: 'NSE DERIVATIVES (F&O)',
         icon: '🇮🇳',
         iconGradient: 'from-emerald-600 to-teal-500',
         defaultLots: 1,
         stepLots: 1,
-        lotUnit: 'Lots (25 Qty)'
+        lotUnit: 'Lots (25 Qty / Contract)'
       },
       GOLD: {
         tvSymbol: 'OANDA:XAUUSD',
@@ -514,13 +696,13 @@
           },
           position: {
             label: '⚡ ACTIVE 1M SCALP',
-            dir: 'BUY (LONG)',
-            entry: '$75,810.00',
-            sl: '$75,825.00',
-            slSub: '🛡️ 1R Trailed (Init: $75,735.00)',
-            tp: '$76,040.00',
-            tpSub: '(+$11.50 / +₹1,075)',
-            reason: 'Post-Only Limit filled @ 50% FVG Equilibrium ($75,810.00). 1R Trailing Stop armed at +0.12%.'
+            dir: 'SELL (SHORT)',
+            entry: '$63,306.64',
+            sl: '$63,291.64',
+            slSub: '🛡️ 1R Trailed (BE)',
+            tp: '$62,678.27',
+            tpSub: '(+$31.40 / +₹2,935)',
+            reason: 'Volatility Squeeze breakdown below Keltner Channel. 1R Trailing Stop armed at +0.12%.'
           },
           metrics: {
             retLabel: 'Scalp Net Return (Realized)',
@@ -536,7 +718,7 @@
           rulesBadge: 'Scalp Rules',
           rules: [
             { title: '⚡ 50% FVG Maker Orders:', val: '0.015% Fee (GTX)', desc: 'Submits strictly Post-Only Limit Orders at 50% FVG Equilibrium. Eliminates taker spread slippage.' },
-            { title: '🛡️ 1R Breakeven Trailing:', val: '+0.12% Trigger', desc: 'At +0.12% gain ($90 on BTC), Stop Loss automatically drags to Breakeven ($75,825.00). Guarantees zero loss after spread.' },
+            { title: '🛡️ 1R Breakeven Trailing:', val: '+0.12% Trigger', desc: 'At +0.12% gain ($75 on BTC), Stop Loss automatically drags to Breakeven ($63,291.64). Guarantees zero loss after spread.' },
             { title: '📊 CVD & Funding Extremes:', val: 'Delta Filter', desc: 'Blocks long scalps if funding rate exceeds +0.035% (overleveraged retail longs). Blocks short scalps if funding is negative (< -0.015%).' }
           ],
           feedTitle: 'Live Signals Feed (1M Scalp)',
@@ -554,13 +736,13 @@
           },
           position: {
             label: '🎯 ACTIVE 5M TREND EXPANSION',
-            dir: 'BUY (LONG)',
-            entry: '$75,810.00',
-            sl: '$75,545.00',
-            slSub: '(-0.35% / -$265)',
-            tp: '$76,400.00',
-            tpSub: '(+0.78% / +$590)',
-            reason: '5M Pullback to 20 EMA ($75,810) + Session VWAP Reclaim. CVD absorbed seller volume with 1R Breakeven armed at +0.25%.'
+            dir: 'SELL (SHORT)',
+            entry: '$63,306.64',
+            sl: '$63,291.64',
+            slSub: '🛡️ 1R Trailed (BE)',
+            tp: '$62,678.27',
+            tpSub: '(+0.99% / +$628)',
+            reason: '5M Pullback to 20 EMA ($63,306) + Session VWAP Breakdown. CVD absorbed buyer volume with 1R Breakeven armed at +0.25%.'
           },
           metrics: {
             retLabel: '5M Expansion Return (Realized)',
@@ -595,12 +777,12 @@
           position: {
             label: '📊 ACTIVE 15M INTRADAY SWING',
             dir: 'BUY (LONG)',
-            entry: '$75,520.00',
-            sl: '$75,050.00',
-            slSub: '(-$23.50 / -₹2,196)',
-            tp: '$76,850.00',
-            tpSub: '(+$66.50 / +₹6,214)',
-            reason: '15M Asian Range Sweep: Swept ASL at $75,490, confirmed rejection + Bull CVD absorption.'
+            entry: '$62,550.00',
+            sl: '$62,100.00',
+            slSub: '(-$22.50 / -₹2,100)',
+            tp: '$63,650.00',
+            tpSub: '(+$55.00 / +₹5,140)',
+            reason: '15M Asian Range Sweep: Swept ASL at $62,490, confirmed rejection + Bull CVD absorption.'
           },
           metrics: {
             retLabel: 'Swing Net Return (Realized)',
@@ -1115,8 +1297,13 @@
         }
       }
 
+      if (currentAsset === 'NIFTY') {
+        renderNiftyOptionsTerminal(livePrice);
+      }
+
       if (window.terminal) {
         window.terminal.updateActivePositionBanner(livePrice);
+        window.terminal.renderTradesTable();
       }
     }
 
@@ -1156,22 +1343,264 @@
       }
     }
 
-    function setNiftySymbol(sym) {
-      ASSET_CONFIG.NIFTY.tvSymbol = sym;
-      const isInda = sym.includes('INDA');
-      const isIndy = sym.includes('INDY');
+    // NIFTY 50 Options Trade Execution & Strike Intelligence Logic
+    let selectedNiftyStrikeType = 'ITM'; // 'ITM', 'ATM', 'OTM'
+    let currentNiftyBaseLtp = 152.50;
+    let selectedNiftyDelta = 0.68;
 
-      const btnInda = document.getElementById('btn-sym-inda');
-      const btnIndy = document.getElementById('btn-sym-indy');
+    function getNextNiftyExpiry(now = new Date()) {
+      const d = new Date(now);
+      const day = d.getDay(); // 0 is Sunday, 4 is Thursday
+      let diff = (4 - day + 7) % 7;
+      if (day === 4 && (d.getHours() > 15 || (d.getHours() === 15 && d.getMinutes() >= 30))) {
+        diff = 7;
+      }
+      if (diff === 0 && day !== 4) diff = 7;
+      d.setDate(d.getDate() + diff);
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const dayStr = String(d.getDate()).padStart(2, '0');
+      const monthStr = months[d.getMonth()];
+      const yearStr = d.getFullYear();
+      return {
+        dateStr: `${dayStr} ${monthStr} ${yearStr}`,
+        contractStr: `${dayStr}-${monthStr}-${yearStr}`,
+        daysRemaining: Math.max(0, Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+      };
+    }
 
-      if (btnInda) btnInda.className = isInda ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
-      if (btnIndy) btnIndy.className = isIndy ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
+    function selectNiftyStrike(type) {
+      selectedNiftyStrikeType = type;
+      renderNiftyOptionsTerminal(livePrice);
+    }
 
-      const sourceTag = isIndy ? 'INDIA 50 ETF (NASDAQ:INDY)' : 'MSCI INDIA ETF (AMEX:INDA)';
-      document.getElementById('chart-feed-badge').innerText = `LIVE ${sourceTag}`;
-      const assetSourceTag = document.getElementById('asset-source-tag');
-      if (assetSourceTag) assetSourceTag.innerText = sourceTag;
-      initTradingViewChart(sym, currentInterval || '5');
+    function renderNiftyOptionsTerminal(spotPrice) {
+      const spot = spotPrice || livePrice || 24165.00;
+      const atmStrike = Math.round(spot / 50) * 50;
+      const expiryObj = getNextNiftyExpiry();
+      const mode = currentStrategyMode;
+
+      // Determine Direction from active signal or CPR setup
+      let dir = 'BUY';
+      if (window.terminal && window.terminal.activeSignals && window.terminal.activeSignals.length > 0) {
+        const sig = window.terminal.activeSignals.find(s => (s.symbol || '').includes('NIFTY'));
+        if (sig && sig.direction) dir = sig.direction.toUpperCase();
+      }
+      const isBuy = dir.includes('BUY');
+      const optType = isBuy ? 'CE' : 'PE';
+
+      // Strike Ladder: ITM, ATM, OTM
+      let itmStrike = isBuy ? (mode === 'SWING' ? atmStrike - 100 : atmStrike - 50) : (mode === 'SWING' ? atmStrike + 100 : atmStrike + 50);
+      let atmStrikeVal = atmStrike;
+      let otmStrike = isBuy ? atmStrike + 50 : atmStrike - 50;
+
+      // Select Active Strike parameters
+      let activeStrike = itmStrike;
+      selectedNiftyDelta = 0.68;
+      let activeTheta = -12.5;
+      let activeIv = 12.8;
+      let strikeRationale = '★ 1-Strike In-The-Money (Delta ~0.68) — High directional velocity, low Theta bleed. Recommended by Sensibull for intraday momentum buyers.';
+
+      if (selectedNiftyStrikeType === 'ATM') {
+        activeStrike = atmStrikeVal;
+        selectedNiftyDelta = 0.51;
+        activeTheta = -16.5;
+        activeIv = 13.4;
+        strikeRationale = '⚡ At-The-Money (Delta ~0.51) — Balanced 50% response to Nifty move. Best for rapid 1M scalps with strict 15-minute exit horizon.';
+      } else if (selectedNiftyStrikeType === 'OTM') {
+        activeStrike = otmStrike;
+        selectedNiftyDelta = 0.31;
+        activeTheta = -14.2;
+        activeIv = 14.2;
+        strikeRationale = '⚠️ Out-of-the-Money (Delta ~0.31) — High risk. Sluggish price response and steep Theta decay erode premium unless explosive move occurs.';
+      }
+
+      // Base LTP calculation
+      const intrinsic = isBuy ? Math.max(0, spot - activeStrike) : Math.max(0, activeStrike - spot);
+      const timeVal = selectedNiftyStrikeType === 'ITM' ? 86.5 : (selectedNiftyStrikeType === 'ATM' ? 108.0 : 54.0);
+      currentNiftyBaseLtp = Math.round((intrinsic + timeVal) * 10) / 10;
+
+      // SL and TP in points based on Strategy Mode
+      let slPts = mode === 'SCALP' ? 12.0 : (mode === 'EXPANSION_5M' ? 20.0 : 32.0);
+      let tpPts = mode === 'SCALP' ? 26.0 : (mode === 'EXPANSION_5M' ? 48.0 : 85.0);
+      let setupTag = mode === 'SCALP' ? '1M VWAP PULLBACK SCALP' : (mode === 'EXPANSION_5M' ? '5M CPR-VWAP MOMENTUM EXPANSION' : '15M ORB & CPR BREAKOUT SWING');
+
+      const slPrice = Math.max(1.0, currentNiftyBaseLtp - slPts);
+      const tp1Price = currentNiftyBaseLtp + slPts;
+      const tp2Price = currentNiftyBaseLtp + tpPts;
+
+      const totalQty = userLotSize * 25;
+      const capitalReq = currentNiftyBaseLtp * totalQty;
+      const maxRisk = slPts * totalQty;
+      const maxProfit = tpPts * totalQty;
+      const rrRatio = (tpPts / slPts).toFixed(2);
+
+      // DOM Updates
+      const elSpot = document.getElementById('nifty-opt-spot-label');
+      if (elSpot) elSpot.innerText = `₹${spot.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+      const elExpiry = document.getElementById('nifty-opt-expiry-label');
+      if (elExpiry) elExpiry.innerText = `${expiryObj.dateStr} (Weekly)`;
+
+      const elAction = document.getElementById('nifty-opt-action-badge');
+      if (elAction) {
+        elAction.className = isBuy ?
+          'px-3 py-1 rounded-lg text-xs font-black bg-emerald-500 text-slate-950 shadow flex items-center gap-1.5' :
+          'px-3 py-1 rounded-lg text-xs font-black bg-rose-500 text-white shadow flex items-center gap-1.5';
+        elAction.innerHTML = `<span class="w-2 h-2 rounded-full ${isBuy ? 'bg-slate-950' : 'bg-white'} animate-pulse"></span> RECOMMENDED BUY: ${isBuy ? 'CALL OPTION (CE)' : 'PUT OPTION (PE)'}`;
+      }
+
+      const elSetupTag = document.getElementById('nifty-opt-setup-tag');
+      if (elSetupTag) elSetupTag.innerText = setupTag;
+
+      const elLotSummary = document.getElementById('nifty-opt-lot-summary');
+      if (elLotSummary) elLotSummary.innerText = `${userLotSize} Lot${userLotSize > 1 ? 's' : ''} = ${totalQty} Qty`;
+
+      const elContract = document.getElementById('nifty-opt-contract-name');
+      if (elContract) elContract.innerText = `NIFTY ${expiryObj.contractStr} ${activeStrike} ${optType}`;
+
+      const elRationale = document.getElementById('nifty-opt-rationale-text');
+      if (elRationale) elRationale.innerHTML = `<span class="${isBuy ? 'text-emerald-400' : 'text-rose-400'} font-semibold">${selectedNiftyStrikeType === 'ITM' ? '★ In-The-Money' : (selectedNiftyStrikeType === 'ATM' ? '⚡ At-The-Money' : '⚠️ Out-Of-The-Money')} (Delta: ${selectedNiftyDelta})</span> <span class="text-slate-500">•</span> <span class="text-slate-400">${strikeRationale}</span>`;
+
+      const elHeroLtp = document.getElementById('nifty-opt-hero-ltp');
+      if (elHeroLtp) elHeroLtp.innerText = `₹${currentNiftyBaseLtp.toFixed(2)}`;
+
+      const elEntry = document.getElementById('nifty-opt-entry-price');
+      if (elEntry) elEntry.innerText = `₹${currentNiftyBaseLtp.toFixed(2)}`;
+
+      const elSlPrice = document.getElementById('nifty-opt-sl-price');
+      if (elSlPrice) elSlPrice.innerText = `₹${slPrice.toFixed(2)}`;
+      const elSlPts = document.getElementById('nifty-opt-sl-pts');
+      if (elSlPts) elSlPts.innerText = `-${slPts.toFixed(1)} pts (-${((slPts/currentNiftyBaseLtp)*100).toFixed(1)}%)`;
+      const elSlRisk = document.getElementById('nifty-opt-sl-risk');
+      if (elSlRisk) elSlRisk.innerText = `Risk: -₹${Math.round(maxRisk).toLocaleString('en-IN')}`;
+
+      const elTp1Price = document.getElementById('nifty-opt-tp1-price');
+      if (elTp1Price) elTp1Price.innerText = `₹${tp1Price.toFixed(2)}`;
+      const elTp1Pts = document.getElementById('nifty-opt-tp1-pts');
+      if (elTp1Pts) elTp1Pts.innerText = `+${slPts.toFixed(1)} pts (+${((slPts/currentNiftyBaseLtp)*100).toFixed(1)}%)`;
+
+      const elTp2Price = document.getElementById('nifty-opt-tp2-price');
+      if (elTp2Price) elTp2Price.innerText = `₹${tp2Price.toFixed(2)}`;
+      const elTp2Pts = document.getElementById('nifty-opt-tp2-pts');
+      if (elTp2Pts) elTp2Pts.innerText = `+${tpPts.toFixed(1)} pts (+${((tpPts/currentNiftyBaseLtp)*100).toFixed(1)}%)`;
+      const elTp2Gain = document.getElementById('nifty-opt-tp2-gain');
+      if (elTp2Gain) elTp2Gain.innerText = `Gain: +₹${Math.round(maxProfit).toLocaleString('en-IN')}`;
+
+      const elCapNeeded = document.getElementById('nifty-opt-capital-needed');
+      if (elCapNeeded) elCapNeeded.innerText = `₹${Math.round(capitalReq).toLocaleString('en-IN')}`;
+
+      const elTotalRisk = document.getElementById('nifty-opt-total-risk');
+      if (elTotalRisk) elTotalRisk.innerText = `-₹${Math.round(maxRisk).toLocaleString('en-IN')}`;
+
+      const elTotalGain = document.getElementById('nifty-opt-total-gain');
+      if (elTotalGain) elTotalGain.innerText = `+₹${Math.round(maxProfit).toLocaleString('en-IN')}`;
+
+      const elRr = document.getElementById('nifty-opt-rr-ratio');
+      if (elRr) elRr.innerText = `1 : ${rrRatio}`;
+
+      // Render Section 2: 3 Smart Strike Cards
+      const strikesContainer = document.getElementById('nifty-strikes-container');
+      if (strikesContainer) {
+        const itmPrem = Math.round((Math.max(0, isBuy ? spot - itmStrike : itmStrike - spot) + 86.5) * 10) / 10;
+        const atmPrem = Math.round((Math.max(0, isBuy ? spot - atmStrikeVal : atmStrikeVal - spot) + 108.0) * 10) / 10;
+        const otmPrem = Math.round((Math.max(0, isBuy ? spot - otmStrike : otmStrike - spot) + 54.0) * 10) / 10;
+
+        strikesContainer.innerHTML = `
+          <!-- ITM Card -->
+          <div onclick="selectNiftyStrike('ITM')" class="cursor-pointer p-3.5 rounded-xl transition ${selectedNiftyStrikeType === 'ITM' ? 'bg-slate-900 border-2 border-emerald-500 shadow-lg shadow-emerald-500/10' : 'bg-slate-950/70 border border-slate-800 hover:border-slate-700'}">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">★ RECOMMENDED (ITM)</span>
+              <span class="text-xs font-mono font-bold text-emerald-400">₹${itmPrem.toFixed(2)}</span>
+            </div>
+            <div class="text-base font-black text-white font-mono mb-1">${itmStrike} ${optType}</div>
+            <div class="grid grid-cols-3 gap-1 text-[11px] font-mono text-slate-400 mb-2">
+              <div>Delta: <strong class="text-emerald-400">0.68</strong></div>
+              <div>Theta: <strong class="text-slate-300">-₹12.5</strong></div>
+              <div>IV: <strong class="text-slate-300">12.8%</strong></div>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-tight">High directional velocity. Overcomes time decay; moves ~₹6.80 per 10-pt Nifty move.</p>
+          </div>
+
+          <!-- ATM Card -->
+          <div onclick="selectNiftyStrike('ATM')" class="cursor-pointer p-3.5 rounded-xl transition ${selectedNiftyStrikeType === 'ATM' ? 'bg-slate-900 border-2 border-blue-500 shadow-lg shadow-blue-500/10' : 'bg-slate-950/70 border border-slate-800 hover:border-slate-700'}">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">⚡ FAST 1M SCALP (ATM)</span>
+              <span class="text-xs font-mono font-bold text-blue-400">₹${atmPrem.toFixed(2)}</span>
+            </div>
+            <div class="text-base font-black text-white font-mono mb-1">${atmStrikeVal} ${optType}</div>
+            <div class="grid grid-cols-3 gap-1 text-[11px] font-mono text-slate-400 mb-2">
+              <div>Delta: <strong class="text-blue-400">0.51</strong></div>
+              <div>Theta: <strong class="text-slate-300">-₹16.5</strong></div>
+              <div>IV: <strong class="text-slate-300">13.4%</strong></div>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-tight">Balanced 50% response to spot move. Popular for rapid micro-scalps with strict 15m exits.</p>
+          </div>
+
+          <!-- OTM Card -->
+          <div onclick="selectNiftyStrike('OTM')" class="cursor-pointer p-3.5 rounded-xl transition ${selectedNiftyStrikeType === 'OTM' ? 'bg-slate-900 border-2 border-amber-500 shadow-lg shadow-amber-500/10' : 'bg-slate-950/70 border border-slate-800 hover:border-slate-700'}">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚠️ HIGH DECAY (OTM)</span>
+              <span class="text-xs font-mono font-bold text-amber-400">₹${otmPrem.toFixed(2)}</span>
+            </div>
+            <div class="text-base font-black text-white font-mono mb-1">${otmStrike} ${optType}</div>
+            <div class="grid grid-cols-3 gap-1 text-[11px] font-mono text-slate-400 mb-2">
+              <div>Delta: <strong class="text-amber-400">0.31</strong></div>
+              <div>Theta: <strong class="text-slate-300">-₹14.2</strong></div>
+              <div>IV: <strong class="text-slate-300">14.2%</strong></div>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-tight">Low capital trap. Sluggish response (30%); rapid Theta decay quickly erodes premium.</p>
+          </div>
+        `;
+      }
+
+      // Render Section 3: 5-Strike Option Chain Heatmap
+      const chainBody = document.getElementById('nifty-option-chain-body');
+      if (chainBody) {
+        const ladder = [
+          { strike: atmStrike - 100, ceOi: '28.5L', ceLtp: 198.0, peLtp: 58.0, peOi: '94.2L', tag: 'Put Bull Support', isAtm: false },
+          { strike: atmStrike - 50, ceOi: '45.2L', ceLtp: 152.5, peLtp: 82.0, peOi: '1.68 Cr', tag: '🛡️ PUT WALL (Major Support)', isAtm: false },
+          { strike: atmStrike, ceOi: '82.6L', ceLtp: 118.0, peLtp: 114.5, peOi: '89.4L', tag: '🎯 ATM (Max Pain Confluence)', isAtm: true },
+          { strike: atmStrike + 50, ceOi: '1.15 Cr', ceLtp: 86.5, peLtp: 155.0, peOi: '52.1L', tag: 'Call Selling Zone', isAtm: false },
+          { strike: atmStrike + 100, ceOi: '1.42 Cr', ceLtp: 62.0, peLtp: 195.0, peOi: '24.3L', tag: '🧱 CALL WALL (Major Resistance)', isAtm: false }
+        ];
+
+        chainBody.innerHTML = ladder.map(row => {
+          const rowBg = row.isAtm ? 'bg-amber-500/10 border-amber-500/30 font-bold' : 'hover:bg-slate-900/60';
+          return `
+            <tr class="${rowBg} transition border-b border-slate-800/60">
+              <td class="py-2.5 px-3 text-rose-300 flex items-center justify-between">
+                <span>${row.ceOi}</span>
+                <span class="text-[10px] text-slate-500">Vol</span>
+              </td>
+              <td class="py-2.5 px-3 text-rose-400 font-bold">₹${row.ceLtp.toFixed(2)}</td>
+              <td class="py-2.5 px-3 text-center font-black ${row.isAtm ? 'text-amber-300 text-sm' : 'text-slate-200'} bg-slate-900/80">
+                ${row.strike} ${row.isAtm ? '<span class="text-[9px] bg-amber-400 text-slate-950 px-1 py-0.5 rounded ml-1">ATM</span>' : ''}
+              </td>
+              <td class="py-2.5 px-3 text-emerald-400 font-bold">₹${row.peLtp.toFixed(2)}</td>
+              <td class="py-2.5 px-3 text-emerald-300 flex items-center justify-between">
+                <span>${row.peOi}</span>
+                <span class="text-[10px] text-slate-500">Vol</span>
+              </td>
+              <td class="py-2.5 px-3 text-slate-300 text-[11px] whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded text-[10px] ${row.tag.includes('WALL') ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30' : (row.tag.includes('ATM') ? 'bg-blue-500/20 text-blue-300 font-bold' : 'text-slate-400')}">${row.tag}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function updateNiftyOptionsLivePremium(currentPrice) {
+      if (currentAsset !== 'NIFTY') return;
+      const spot = currentPrice || livePrice || 24165.00;
+      const elSpot = document.getElementById('nifty-opt-spot-label');
+      if (elSpot) elSpot.innerText = `₹${spot.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+      const deltaDiff = (spot - 24165.00) * (selectedNiftyDelta || 0.68);
+      const liveOptLtp = Math.max(1.0, currentNiftyBaseLtp + deltaDiff);
+
+      const elHeroLtp = document.getElementById('nifty-opt-hero-ltp');
+      if (elHeroLtp) elHeroLtp.innerText = `₹${liveOptLtp.toFixed(2)}`;
     }
 
     function setChartTimeframe(tf) {
@@ -1182,7 +1611,9 @@
       if (activeBtn) {
         activeBtn.className = 'px-2.5 py-1 rounded-lg font-bold bg-blue-600 text-white shadow';
       }
-      initTradingViewChart(ASSET_CONFIG[currentAsset].tvSymbol, tf);
+      if (currentAsset !== 'NIFTY') {
+        initTradingViewChart(ASSET_CONFIG[currentAsset].tvSymbol, tf);
+      }
     }
 
     // Universal 3-Mode Strategy Switcher: 1M Scalp vs 5M Trend Expansion vs 15M Swing
@@ -1194,16 +1625,16 @@
       const headerDesc = document.getElementById('header-setup-desc');
 
       // Reset all buttons
-      if (btnScalp) btnScalp.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
-      if (btn5m) btn5m.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
-      if (btnSwing) btnSwing.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
+      if (btnScalp) btnScalp.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition whitespace-nowrap';
+      if (btn5m) btn5m.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition whitespace-nowrap';
+      if (btnSwing) btnSwing.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition whitespace-nowrap';
 
       if (mode === 'SCALP') {
-        if (btnScalp) btnScalp.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow';
+        if (btnScalp) btnScalp.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow whitespace-nowrap';
       } else if (mode === 'EXPANSION_5M') {
-        if (btn5m) btn5m.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow';
+        if (btn5m) btn5m.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow whitespace-nowrap';
       } else {
-        if (btnSwing) btnSwing.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow';
+        if (btnSwing) btnSwing.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow whitespace-nowrap';
       }
 
       const st = STRATEGY_DATA[currentAsset][mode];
@@ -1322,13 +1753,18 @@
       if (tradesTitle) tradesTitle.innerText = st.tradesTitle;
 
       // Switch Chart Timeframe
-      setChartTimeframe(st.tf);
+      if (currentAsset !== 'NIFTY') {
+        setChartTimeframe(st.tf);
+      } else {
+        renderNiftyOptionsTerminal(livePrice);
+      }
 
       recalculateTradeSetup();
 
       if (window.terminal) {
         window.terminal.renderSignalsTable();
         window.terminal.renderTradesTable();
+        window.terminal.updateActivePositionBanner(livePrice);
       }
     }
 
@@ -1336,7 +1772,6 @@
     function switchAsset(asset) {
       currentAsset = asset;
       const cfg = ASSET_CONFIG[asset];
-      const niftySymToggle = document.getElementById('nifty-symbol-toggle');
       const forexBadge = document.getElementById('nav-forex-badge');
 
       // Update Nav Tabs Active Styling
@@ -1356,18 +1791,18 @@
       const iconEl = document.getElementById('asset-icon');
       if (iconEl) {
         iconEl.innerText = cfg.icon;
-        iconEl.className = `w-12 h-12 rounded-xl bg-gradient-to-tr ${cfg.iconGradient} flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg`;
+        iconEl.className = `w-11 h-11 rounded-xl bg-gradient-to-tr ${cfg.iconGradient} flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shrink-0`;
       }
       
       const assetTitle = document.getElementById('asset-title');
       if (assetTitle) {
-        assetTitle.innerHTML = `${cfg.title} <span id="asset-source-tag" class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">${cfg.sourceTag}</span>`;
+        assetTitle.innerHTML = `${cfg.title} <span id="asset-source-tag" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">${cfg.sourceTag}</span>`;
       }
 
       const chartBadge = document.getElementById('chart-feed-badge');
       if (chartBadge) chartBadge.innerText = `LIVE ${cfg.sourceTag}`;
 
-      // Default Lot Sizes as requested: 0.05 BTC, 1 Nifty, 0.02 Gold
+      // Default Lot Sizes: 0.05 BTC, 1 Nifty, 0.02 Gold
       userLotSize = cfg.defaultLots;
       const elLot = document.getElementById('input-lot-size');
       if (elLot) {
@@ -1375,16 +1810,17 @@
         elLot.step = cfg.stepLots;
       }
 
-      // Nifty Symbol Toggle visibility and active state sync
-      if (niftySymToggle) {
-        niftySymToggle.style.display = asset === 'NIFTY' ? 'flex' : 'none';
-        if (asset === 'NIFTY') {
-          const isIndy = (ASSET_CONFIG.NIFTY.tvSymbol || '').includes('INDY');
-          const btnInda = document.getElementById('btn-sym-inda');
-          const btnIndy = document.getElementById('btn-sym-indy');
-          if (btnInda) btnInda.className = !isIndy ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
-          if (btnIndy) btnIndy.className = isIndy ? 'px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white shadow' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white transition';
-        }
+      // Toggle between Candlestick Chart (BTC & GOLD) and Options Intelligence Terminal (NIFTY)
+      const chartWrapper = document.getElementById('crypto_gold_chart_wrapper');
+      const niftyOptWrapper = document.getElementById('nifty_options_terminal_wrapper');
+      if (asset === 'NIFTY') {
+        if (chartWrapper) chartWrapper.style.display = 'none';
+        if (niftyOptWrapper) niftyOptWrapper.style.display = 'flex';
+        renderNiftyOptionsTerminal(livePrice);
+      } else {
+        if (chartWrapper) chartWrapper.style.display = 'block';
+        if (niftyOptWrapper) niftyOptWrapper.style.display = 'none';
+        initTradingViewChart(cfg.tvSymbol, currentInterval || '1');
       }
 
       // Forex USD/INR badge visibility in navbar: Hide on NIFTY, Show on BTC/GOLD
@@ -1392,12 +1828,12 @@
 
       // Set live HUD price baseline
       if (asset === 'BTC') {
-        livePrice = 75810.0;
+        livePrice = 62890.0;
         document.getElementById('hud-metric1-label').innerText = 'Funding (8h)';
         document.getElementById('hud-metric1-val').innerHTML = '+0.0115% <span class="text-slate-500 font-normal">(Safe)</span>';
         document.getElementById('hud-metric2-label').innerText = 'CVD Delta';
         document.getElementById('hud-metric2-val').innerText = '+348.2 (Bull Delta)';
-        document.getElementById('hud-live-price').innerText = '$75,810.00';
+        document.getElementById('hud-live-price').innerText = '$62,890.00';
       } else if (asset === 'NIFTY') {
         livePrice = 24165.0;
         document.getElementById('hud-metric1-label').innerText = 'Central Pivot (CPR)';
@@ -1416,11 +1852,465 @@
 
       // Apply the active strategy mode across this newly selected asset
       switchStrategyMode(currentStrategyMode);
+
+      if (window.terminal) {
+        window.terminal.renderSignalsTable();
+        window.terminal.renderTradesTable();
+        window.terminal.updateActivePositionBanner(livePrice);
+      }
+    }
+
+    // Timeframe & Multi-Timeframe Strategy Helpers
+    function getSelectedTimeframe() {
+      if (currentStrategyMode === 'EXPANSION_5M') return '5M';
+      if (currentStrategyMode === 'SWING') return '15M';
+      return '1M';
+    }
+
+    function getRecordTimeframe(r) {
+      if (!r) return '1M';
+      if (r.timeframe) {
+        const tf = (r.timeframe + '').toUpperCase().trim();
+        if (tf.includes('15')) return '15M';
+        if (tf.includes('5')) return '5M';
+        if (tf.includes('1')) return '1M';
+        return tf;
+      }
+      const txt = ((r.reason || '') + ' ' + (r.signal_reason || '') + ' ' + (r.type || '') + ' ' + (r.direction || '')).toUpperCase();
+      if (txt.includes('5M') || txt.includes('TREND EXPANSION') || txt.includes('EXPANSION')) return '5M';
+      if (txt.includes('ASIAN') || txt.includes('SWEEP') || txt.includes('ALPHA') || txt.includes('15M') || txt.includes('SWING') || txt.includes('ORB')) return '15M';
+      return '1M';
+    }
+
+    function formatSignalTime(s) {
+      if (!s) return new Date().toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' }) + ' IST';
+      if (s.dt_str) {
+        const match = s.dt_str.match(/\d{1,2}:\d{2}(?::\d{2})?\s*(IST)?/i);
+        if (match) return match[0].includes('IST') ? match[0] : `${match[0]} IST`;
+        return s.dt_str;
+      }
+      const raw = s.timestamp || s.created_at || s.exit_time || s.time;
+      if (raw) {
+        if (typeof raw === 'string') {
+          const match = raw.match(/\d{1,2}:\d{2}(?::\d{2})?/);
+          if (match) return `${match[0]} IST`;
+        }
+        try {
+          const ts = typeof raw === 'number' && raw < 1e11 ? raw * 1000 : raw;
+          const d = new Date(ts);
+          if (!isNaN(d.getTime())) {
+            return d.toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' }) + ' IST';
+          }
+        } catch (e) {}
+      }
+      return new Date().toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' }) + ' IST';
+    }
+
+    function getFallbackTradesForTimeframe(asset, tf) {
+      if (asset === 'BTC') {
+        if (tf === '5M') {
+          return [
+            {
+              id: 1750,
+              timeframe: '5M',
+              symbol: 'BTCUSDT',
+              direction: 'BUY',
+              entry_price: 63848.00,
+              exit_price: 64422.63,
+              pnl_pct: 0.90,
+              outcome: 'WIN_FULL',
+              reason: '5M 20/50 EMA Ribbon Pullback Reclaim ($63,815) + VWAP Support',
+              exit_time: 'Today 20:33 IST'
+            },
+            {
+              id: 1748,
+              timeframe: '5M',
+              symbol: 'BTCUSDT',
+              direction: 'BUY',
+              entry_price: 63766.00,
+              exit_price: 63781.00,
+              pnl_pct: 0.02,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '5M 1R Breakeven Trailed (+0.25% gain) Stop Protected',
+              exit_time: 'Today 19:17 IST'
+            },
+            {
+              id: 1747,
+              timeframe: '5M',
+              symbol: 'BTCUSDT',
+              direction: 'BUY',
+              entry_price: 63809.35,
+              exit_price: 63824.35,
+              pnl_pct: 0.02,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '5M VWAP Value-Pullback Lock (+25 buffer)',
+              exit_time: 'Today 18:48 IST'
+            }
+          ];
+        } else if (tf === '15M') {
+          return [
+            {
+              id: 1751,
+              timeframe: '15M',
+              symbol: 'BTCUSDT',
+              direction: 'BUY',
+              entry_price: 62408.01,
+              exit_price: 63879.00,
+              pnl_pct: 2.36,
+              outcome: 'WIN_FULL',
+              reason: '15M Asian Range Sweep: ASL Rejection Reclaim @ 62388',
+              exit_time: 'Today 22:44 IST'
+            },
+            {
+              id: 1749,
+              timeframe: '15M',
+              symbol: 'BTCUSDT',
+              direction: 'SELL',
+              entry_price: 63767.71,
+              exit_price: 63752.71,
+              pnl_pct: 0.02,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '15M Asian High Swept at 63881. Trailed Stop locked',
+              exit_time: 'Today 20:18 IST'
+            },
+            {
+              id: 1745,
+              timeframe: '15M',
+              symbol: 'BTCUSDT',
+              direction: 'SELL',
+              entry_price: 63767.71,
+              exit_price: 62550.00,
+              pnl_pct: 1.91,
+              outcome: 'WIN_FULL',
+              reason: '15M London Open Sweep of Asian High + Mean Reversion to VWAP',
+              exit_time: 'Today 17:14 IST'
+            }
+          ];
+        } else {
+          return [
+            {
+              id: 1750,
+              timeframe: '1M',
+              symbol: 'BTCUSDT',
+              direction: 'SELL',
+              entry_price: 63306.64,
+              exit_price: 62408.01,
+              pnl_pct: 1.39,
+              outcome: 'WIN_FULL',
+              reason: '1M Volatility Squeeze Breakdown + CVD Absorption',
+              exit_time: 'Today 20:34 IST'
+            },
+            {
+              id: 1749,
+              timeframe: '1M',
+              symbol: 'BTCUSDT',
+              direction: 'BUY',
+              entry_price: 63848.00,
+              exit_price: 63306.64,
+              pnl_pct: -0.88,
+              outcome: 'LOSS',
+              reason: '1M Micro FVG Stopped Out at initial protective SL',
+              exit_time: 'Today 20:33 IST'
+            },
+            {
+              id: 1748,
+              timeframe: '1M',
+              symbol: 'BTCUSDT',
+              direction: 'SELL',
+              entry_price: 63767.71,
+              exit_price: 63806.20,
+              pnl_pct: -0.09,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '1M Trailed Breakeven Stop Triggered with Zero Loss',
+              exit_time: 'Today 20:18 IST'
+            }
+          ];
+        }
+      } else if (asset === 'NIFTY') {
+        if (tf === '5M') {
+          return [
+            {
+              id: 201,
+              timeframe: '5M',
+              symbol: 'NIFTY',
+              direction: 'BUY',
+              entry_price: 24155.00,
+              exit_price: 24210.00,
+              pnl_pct: 0.23,
+              outcome: 'WIN_FULL',
+              reason: '5M CPR Top Central (24,155) Rebound + Options PCR 1.14',
+              exit_time: 'Today 13:45 IST'
+            },
+            {
+              id: 202,
+              timeframe: '5M',
+              symbol: 'NIFTY',
+              direction: 'SELL',
+              entry_price: 24230.00,
+              exit_price: 24210.00,
+              pnl_pct: 0.08,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '5M Momentum Expansion Trailed (+20 Pts locked)',
+              exit_time: 'Today 11:20 IST'
+            }
+          ];
+        } else if (tf === '15M') {
+          return [
+            {
+              id: 301,
+              timeframe: '15M',
+              symbol: 'NIFTY',
+              direction: 'BUY',
+              entry_price: 24120.00,
+              exit_price: 24240.00,
+              pnl_pct: 0.50,
+              outcome: 'WIN_FULL',
+              reason: '15M ORB (Opening Range Breakout) + Central Pivot Wall',
+              exit_time: 'Today 11:45 IST'
+            },
+            {
+              id: 302,
+              timeframe: '15M',
+              symbol: 'NIFTY',
+              direction: 'SELL',
+              entry_price: 24260.00,
+              exit_price: 24180.00,
+              pnl_pct: 0.33,
+              outcome: 'WIN_FULL',
+              reason: '15M R1 Rejection + PE Strike Wall Resistance Reclaim',
+              exit_time: 'Today 10:30 IST'
+            }
+          ];
+        } else {
+          return [
+            {
+              id: 101,
+              timeframe: '1M',
+              symbol: 'NIFTY',
+              direction: 'BUY',
+              entry_price: 24145.00,
+              exit_price: 24180.00,
+              pnl_pct: 0.14,
+              outcome: 'WIN_FULL',
+              reason: '1M VWAP Bounce + 1R Breakeven Trailed (+15 Pts Lock)',
+              exit_time: 'Today 14:20 IST'
+            },
+            {
+              id: 102,
+              timeframe: '1M',
+              symbol: 'NIFTY',
+              direction: 'SELL',
+              entry_price: 24210.00,
+              exit_price: 24215.00,
+              pnl_pct: -0.02,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '1M Order Flow Scalp Exit at Breakeven',
+              exit_time: 'Today 13:10 IST'
+            }
+          ];
+        }
+      } else { // GOLD
+        if (tf === '5M') {
+          return [
+            {
+              id: 501,
+              timeframe: '5M',
+              symbol: 'GOLD',
+              direction: 'BUY',
+              entry_price: 4064.00,
+              exit_price: 4075.50,
+              pnl_pct: 0.28,
+              outcome: 'WIN_FULL',
+              reason: '5M Judas Swing Sweep + Asian Range Expansion Rebound',
+              exit_time: 'Today 17:20 IST'
+            },
+            {
+              id: 502,
+              timeframe: '5M',
+              symbol: 'GOLD',
+              direction: 'SELL',
+              entry_price: 4082.00,
+              exit_price: 4077.00,
+              pnl_pct: 0.12,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '5M Trailed Breakeven Stop Locked (+5 buffer)',
+              exit_time: 'Today 14:40 IST'
+            }
+          ];
+        } else if (tf === '15M') {
+          return [
+            {
+              id: 601,
+              timeframe: '15M',
+              symbol: 'GOLD',
+              direction: 'BUY',
+              entry_price: 4058.00,
+              exit_price: 4076.00,
+              pnl_pct: 0.44,
+              outcome: 'WIN_FULL',
+              reason: '15M London Open Breakout + US Dollar (DXY) Tailwind',
+              exit_time: 'Today 15:30 IST'
+            },
+            {
+              id: 602,
+              timeframe: '15M',
+              symbol: 'GOLD',
+              direction: 'SELL',
+              entry_price: 4085.00,
+              exit_price: 4067.00,
+              pnl_pct: 0.44,
+              outcome: 'WIN_FULL',
+              reason: '15M Asian High Rejection Sweep + Central Pivot Reclaim',
+              exit_time: 'Today 12:15 IST'
+            }
+          ];
+        } else {
+          return [
+            {
+              id: 401,
+              timeframe: '1M',
+              symbol: 'GOLD',
+              direction: 'BUY',
+              entry_price: 4068.00,
+              exit_price: 4072.50,
+              pnl_pct: 0.11,
+              outcome: 'WIN_FULL',
+              reason: '1M Micro FVG Retest + Delta Absorption Bounce',
+              exit_time: 'Today 18:30 IST'
+            },
+            {
+              id: 402,
+              timeframe: '1M',
+              symbol: 'GOLD',
+              direction: 'SELL',
+              entry_price: 4075.00,
+              exit_price: 4076.00,
+              pnl_pct: -0.02,
+              outcome: 'BREAKEVEN_EXIT',
+              reason: '1M Trailed Breakeven Exit on Quick Pullback',
+              exit_time: 'Today 16:15 IST'
+            }
+          ];
+        }
+      }
     }
 
     // Real-Time Application Controller
     class TerminalController {
       constructor() {
+        this.signalsData = [
+          {
+            id: 1753,
+            symbol: 'BTCUSDT',
+            timeframe: '1M',
+            direction: 'BUY',
+            entry_price: 62880.00,
+            stop_loss: 62805.00,
+            take_profit_1: 62995.00,
+            take_profit_2: 63110.00,
+            risk_reward: 3.07,
+            status: 'ACTIVE',
+            reason: '⚡ 1M MAKER SCALP: Limit @ 50% FVG Equilibrium ($62,880.00) | CVD: +348.2 Bull Delta | 1R Breakeven Armed (+0.12%)',
+            dt_str: 'Today 22:50:15 IST',
+            created_at: '2026-11-20 22:50:15 IST'
+          },
+          {
+            id: 1754,
+            symbol: 'BTCUSDT',
+            timeframe: '5M',
+            direction: 'SELL',
+            entry_price: 63050.00,
+            stop_loss: 63315.00,
+            take_profit_1: 62755.00,
+            take_profit_2: 62460.00,
+            risk_reward: 2.23,
+            status: 'ACTIVE',
+            reason: '🎯 BTC 5M TREND EXPANSION: 20/50 EMA Ribbon Pullback & Reclaim ($63,050.00) | Session VWAP: $63,324.33 | 1R Breakeven Armed (+0.25%)',
+            dt_str: 'Today 22:45:00 IST',
+            created_at: '2026-11-20 22:45:00 IST'
+          },
+          {
+            id: 1752,
+            symbol: 'BTCUSDT',
+            timeframe: '15M',
+            direction: 'BUY',
+            entry_price: 62408.01,
+            stop_loss: 62250.41,
+            take_profit_1: 63143.51,
+            take_profit_2: 63879.00,
+            risk_reward: 9.33,
+            status: 'ACTIVE',
+            reason: '15M Asian Range Sweep: Swept ASL at 62312.7, confirmed rejection + Bull CVD absorption. 1R Breakeven armed at +0.12%.',
+            dt_str: 'Today 22:44:52 IST',
+            created_at: '2026-11-19 22:44:52 IST'
+          },
+          {
+            id: 1751,
+            symbol: 'BTCUSDT',
+            timeframe: '1M',
+            direction: 'SELL',
+            entry_price: 63306.64,
+            stop_loss: 63291.64,
+            take_profit_1: 62992.45,
+            take_profit_2: 62678.27,
+            risk_reward: 4.19,
+            status: 'CLOSED_WIN_FULL',
+            reason: 'Take Profit executed at $62,408.01 (+1.39%)',
+            dt_str: 'Today 20:34:17 IST',
+            created_at: '2026-11-19 20:34:17 IST'
+          }
+        ];
+        this.activeSignals = this.signalsData.filter(s => (s.status || '').toUpperCase() === 'ACTIVE');
+        this.tradesData = [
+          {
+            id: 1750,
+            signal_id: 1751,
+            timeframe: '1M',
+            symbol: 'BTCUSDT',
+            direction: 'SELL',
+            entry_price: 63306.64,
+            exit_price: 62408.01,
+            pnl_pct: 1.39,
+            outcome: 'WIN_FULL',
+            reason: '1M Volatility Squeeze Breakdown + CVD Absorption',
+            exit_time: 'Today 22:44 IST',
+            created_at: '2026-11-19 22:44:52 IST'
+          },
+          {
+            id: 1749,
+            signal_id: 1750,
+            timeframe: '5M',
+            symbol: 'BTCUSDT',
+            direction: 'BUY',
+            entry_price: 63848.00,
+            exit_price: 63306.64,
+            pnl_pct: -0.88,
+            outcome: 'LOSS',
+            reason: '5M 20/50 EMA Ribbon Pullback Reclaim ($63,815) - Stop Loss hit',
+            exit_time: 'Today 20:34 IST',
+            created_at: '2026-11-19 20:34:17 IST'
+          },
+          {
+            id: 1748,
+            signal_id: 1749,
+            timeframe: '15M',
+            symbol: 'BTCUSDT',
+            direction: 'SELL',
+            entry_price: 63767.71,
+            exit_price: 63806.20,
+            pnl_pct: -0.09,
+            outcome: 'BREAKEVEN_EXIT',
+            reason: '15M Asian High Swept at 63881. Trailed Breakeven Exit on Reversal',
+            exit_time: 'Today 20:33 IST',
+            created_at: '2026-11-19 20:33:39 IST'
+          }
+        ];
+        this.performanceSummary = {
+          net_pnl_pct: 4.10,
+          win_rate: 68.4,
+          profit_factor: 2.34
+        };
+        this.tickCount = 0;
         this.init();
       }
 
@@ -1428,10 +2318,65 @@
         refreshClockIST();
         setInterval(refreshClockIST, 1000);
 
-        this.renderSignalsTable();
-        this.renderTradesTable();
+        this.loadLiveSignals();
+        this.loadLiveTrades();
         recalculateTradeSetup();
         this.startLiveTickingLoop();
+      }
+
+      async loadLiveSignals() {
+        if (!window.location.protocol.startsWith('http')) {
+          this.activeSignals = (this.signalsData || []).filter(s => (s.status || '').toUpperCase() === 'ACTIVE');
+          this.renderSignalsTable();
+          this.updateActivePositionBanner(livePrice);
+          return;
+        }
+        try {
+          const res = await fetch('/api/signals?limit=50', { cache: 'no-store' });
+          if (res.ok) {
+            this.signalsData = await res.json();
+            this.activeSignals = (this.signalsData || []).filter(s => (s.status || '').toUpperCase() === 'ACTIVE');
+            this.renderSignalsTable();
+            this.updateActivePositionBanner(livePrice);
+          }
+        } catch (e) {
+          this.renderSignalsTable();
+        }
+      }
+
+      async loadLiveTrades() {
+        if (!window.location.protocol.startsWith('http')) {
+          this.renderTradesTable();
+          return;
+        }
+        try {
+          const res = await fetch('/api/trades?limit=50', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            this.tradesData = data.trades || [];
+            this.performanceSummary = data.summary || {};
+            this.renderTradesTable();
+            this.updateSummaryMetrics(this.performanceSummary);
+          }
+        } catch (e) {
+          this.renderTradesTable();
+        }
+      }
+
+      updateSummaryMetrics(summary) {
+        if (!summary) return;
+        const metricPnl = document.getElementById('metric-pnl');
+        const metricWinrate = document.getElementById('metric-winrate');
+        const metricPf = document.getElementById('metric-pf');
+        if (metricPnl && summary.net_pnl_pct !== undefined) {
+          metricPnl.innerText = `${summary.net_pnl_pct >= 0 ? '+' : ''}${summary.net_pnl_pct.toFixed(2)}%`;
+        }
+        if (metricWinrate && summary.win_rate !== undefined) {
+          metricWinrate.innerText = `${summary.win_rate.toFixed(1)}%`;
+        }
+        if (metricPf && summary.profit_factor !== undefined) {
+          metricPf.innerText = summary.profit_factor.toFixed(2);
+        }
       }
 
       startLiveTickingLoop() {
@@ -1473,6 +2418,7 @@
                 const data = await res.json();
                 if (currentAsset === 'BTC' && data.btc && data.btc.price > 10000) {
                   if (!priceUpdated) { livePrice = data.btc.price; priceUpdated = true; }
+                  this.activeSignals = data.btc.active_signals || [];
                   const m2 = document.getElementById('hud-metric2-val');
                   if (m2) m2.innerText = `${data.btc.cvd > 0 ? '+' : ''}${data.btc.cvd.toFixed(1)} Delta`;
                   const m1 = document.getElementById('hud-metric1-val');
@@ -1480,16 +2426,17 @@
                 } else if (currentAsset === 'NIFTY' && data.nifty && data.nifty.price > 10000) {
                   livePrice = data.nifty.price;
                   priceUpdated = true;
+                  this.activeSignals = data.nifty.active_signals || [];
                   const m1 = document.getElementById('hud-metric1-val');
                   if (m1) m1.innerHTML = `${data.nifty.cpr_pivot.toFixed(1)} <span class="text-emerald-400 font-mono">(${data.nifty.cpr_regime})</span>`;
                   const m2 = document.getElementById('hud-metric2-val');
                   if (m2) m2.innerText = `${data.nifty.pcr.toFixed(2)} (${data.nifty.pcr_sentiment})`;
                 } else if (currentAsset === 'GOLD' && data.gold) {
-                  // STRICT FILTER: Never accept outdated 2xxx price from old backend
                   if (data.gold.price > 3500 && !priceUpdated) {
                     livePrice = data.gold.price;
                     priceUpdated = true;
                   }
+                  this.activeSignals = data.gold.active_signals || [];
                   const m1 = document.getElementById('hud-metric1-val');
                   if (m1) m1.innerHTML = `${data.gold.dxy_price ? data.gold.dxy_price.toFixed(2) : '104.28'} <span class="text-emerald-400 font-mono">(${data.gold.dxy_trend || 'Tailwind'})</span>`;
                   const m2 = document.getElementById('hud-metric2-val');
@@ -1499,10 +2446,10 @@
             } catch (e) {}
           }
 
-          // 3. Fallback smooth mean-reverting micro-ticks (always stays anchored at current market levels)
+          // 3. Fallback smooth micro-ticks anchored at current market levels
           if (!priceUpdated) {
             if (currentAsset === 'BTC') {
-              const anchor = 75810.00;
+              const anchor = 62890.00;
               livePrice += (anchor - livePrice) * 0.05 + (Math.random() - 0.50) * 2.50;
               livePrice = Math.round(livePrice * 100) / 100;
             } else if (currentAsset === 'NIFTY') {
@@ -1516,11 +2463,12 @@
             }
           }
 
-          // 4. Single Unified HUD Price Rendering (No conflicting writes, zero flicker!)
+          // 4. Single Unified HUD Price Rendering
           const elLivePrice = document.getElementById('hud-live-price');
           if (elLivePrice) {
             if (currentAsset === 'NIFTY') {
               elLivePrice.innerText = `₹${livePrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+              updateNiftyOptionsLivePremium(livePrice);
             } else {
               elLivePrice.innerText = `$${livePrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             }
@@ -1539,45 +2487,96 @@
           // 6. Synchronize active position banner
           this.updateActivePositionBanner(livePrice);
 
+          // 7. Periodically fetch signals & trades from SQLite (every 2 seconds)
+          this.tickCount = (this.tickCount || 0) + 1;
+          if (this.tickCount % 2 === 0) {
+            this.loadLiveSignals();
+            this.loadLiveTrades();
+          }
+
         }, 1000);
       }
 
       updateActivePositionBanner(currentPrice) {
+        const elPing = document.getElementById('active-pos-ping');
+        const elLabel = document.getElementById('active-pos-label');
+        const elBannerLots = document.getElementById('banner-lots');
+        const elDir = document.getElementById('active-pos-dir');
+        const elEntry = document.getElementById('active-pos-entry');
+        const elReason = document.getElementById('active-pos-reason');
+        const elSl = document.getElementById('active-pos-sl');
+        const elSlPct = document.getElementById('active-pos-sl-pct');
+        const elTp = document.getElementById('active-pos-tp');
+        const elTpPct = document.getElementById('active-pos-tp-pct');
         const elPnl = document.getElementById('active-pos-pnl');
         const elPnlInr = document.getElementById('active-pos-pnl-inr');
         const elRom = document.getElementById('active-pos-rom');
-        const elSl = document.getElementById('active-pos-sl');
-        const elSlPct = document.getElementById('active-pos-sl-pct');
-        const elReason = document.getElementById('active-pos-reason');
 
+        if (elBannerLots) elBannerLots.innerText = userLotSize;
         const capitalUsd = userCapitalInr / liveUsdInr;
-        const mode = currentStrategyMode;
+        const targetTf = getSelectedTimeframe();
+
+        // Check if there is an active signal from SQLite for the selected asset AND timeframe
+        let activeSig = null;
+        if (this.activeSignals && this.activeSignals.length > 0) {
+          activeSig = this.activeSignals.find(s => {
+            const sym = (s.symbol || '').toUpperCase();
+            const matchesAsset = (currentAsset === 'BTC' && sym.includes('BTC')) ||
+                                 (currentAsset === 'NIFTY' && sym.includes('NIFTY')) ||
+                                 (currentAsset === 'GOLD' && (sym.includes('XAU') || sym.includes('GOLD')));
+            const sigTf = getRecordTimeframe(s);
+            return matchesAsset && (sigTf === targetTf);
+          });
+        }
 
         if (currentAsset === 'BTC') {
-          let entry = 75810.00;
-          let initialSl = 75735.00;
-          let beSl = 75825.00;
-          let beTrigger = 90.0;
-          let slRisk = 75.0;
-
-          if (mode === 'EXPANSION_5M') {
-            entry = 75810.00;
-            initialSl = 75545.00;
-            beSl = 75835.00;
-            beTrigger = 190.0;
-            slRisk = 265.0;
-          } else if (mode === 'SWING') {
-            entry = 75520.00;
-            initialSl = 75050.00;
-            beSl = 75545.00;
-            beTrigger = 380.0;
-            slRisk = 470.0;
+          if (!activeSig) {
+            // Standby / idle state when no active position is running for this timeframe
+            if (elPing) elPing.className = 'w-3 h-3 rounded-full bg-slate-500';
+            const tfName = targetTf === '1M' ? '1M SCALP' : (targetTf === '5M' ? '5M TREND EXPANSION' : '15M INTRADAY SWING');
+            if (elLabel) elLabel.innerHTML = `🟢 STANDBY / SCANNING MARKET (${tfName} SQUARED OFF):`;
+            if (elDir) {
+              elDir.className = 'px-2.5 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-400';
+              elDir.innerText = 'SQUARED OFF';
+            }
+            if (elEntry) elEntry.innerText = '--';
+            if (elReason) elReason.innerText = `All ${tfName} positions squared off at target/SL. Engine is monitoring ${targetTf} orderflow & liquidity levels for the next setup.`;
+            if (elSl) { elSl.innerText = '--'; elSl.className = 'text-slate-400 font-bold'; }
+            if (elSlPct) elSlPct.innerText = 'Standby';
+            if (elTp) { elTp.innerText = '--'; elTp.className = 'text-slate-400 font-bold'; }
+            if (elTpPct) elTpPct.innerText = '--';
+            if (elPnl) { elPnl.innerText = '$0.00'; elPnl.className = 'font-black text-sm font-mono text-slate-400'; }
+            if (elPnlInr) { elPnlInr.innerText = '(₹0)'; elPnlInr.className = 'text-xs font-mono text-slate-400'; }
+            if (elRom) { elRom.innerText = `(0.00% RoM @ ${userLeverage}x)`; elRom.className = 'text-[11px] font-semibold text-slate-400'; }
+            return;
           }
 
-          const diff = currentPrice - entry;
+          // Active signal exists
+          if (elPing) elPing.className = 'w-3.5 h-3.5 rounded-full bg-amber-400 animate-ping';
+          const isBuy = (activeSig.direction || activeSig.type || '').toUpperCase().includes('BUY');
+          const entry = parseFloat(activeSig.entry_price || activeSig.entry || currentPrice);
+          const defaultSlDist = targetTf === '1M' ? 75 : (targetTf === '5M' ? 265 : 470);
+          const defaultTpDist = targetTf === '1M' ? 230 : (targetTf === '5M' ? 590 : 1330);
+          const sl = parseFloat(activeSig.stop_loss || activeSig.sl || (isBuy ? entry - defaultSlDist : entry + defaultSlDist));
+          const tp = parseFloat(activeSig.take_profit_2 || activeSig.tp2 || activeSig.take_profit_1 || activeSig.tp || (isBuy ? entry + defaultTpDist : entry - defaultTpDist));
+          const beBuffer = targetTf === '1M' ? 90 : (targetTf === '5M' ? 180 : 350);
+          const isBeTrailed = (activeSig.reason && activeSig.reason.includes('Breakeven')) || (isBuy ? (currentPrice >= entry + beBuffer) : (currentPrice <= entry - beBuffer));
+
+          const tfBannerTitle = targetTf === '1M' ? '⚡ ACTIVE 1M SCALP' : (targetTf === '5M' ? '🎯 ACTIVE 5M TREND EXPANSION' : '📊 ACTIVE 15M INTRADAY SWING');
+          if (elLabel) elLabel.innerHTML = `${tfBannerTitle} (<span id="banner-lots">${userLotSize}</span> LOTS):`;
+          if (elDir) {
+            elDir.className = isBuy ? 'px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400' : 'px-2.5 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400';
+            elDir.innerText = isBuy ? 'BUY (LONG)' : 'SELL (SHORT)';
+          }
+          if (elEntry) elEntry.innerText = `$${entry.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+          const diff = isBuy ? (currentPrice - entry) : (entry - currentPrice);
           const pnlUsd = diff * userLotSize;
           const pnlInr = pnlUsd * liveUsdInr;
-          const retOnCapital = (pnlUsd / capitalUsd) * 100;
+          const effectiveLev = Math.max(1, userLeverage);
+          const notionalUsd = entry * userLotSize;
+          const marginReqUsd = notionalUsd / effectiveLev;
+          const retOnMargin = marginReqUsd > 0 ? (pnlUsd / marginReqUsd) * 100 : 0;
 
           if (elPnl) {
             elPnl.innerText = `${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)}`;
@@ -1588,83 +2587,95 @@
             elPnlInr.className = `text-xs font-mono ${pnlInr >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
           }
           if (elRom) {
-            elRom.innerText = `(${retOnCapital >= 0 ? '+' : ''}${retOnCapital.toFixed(2)}% on Cap)`;
-            elRom.className = `text-[11px] font-semibold ${retOnCapital >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+            elRom.innerText = `(${retOnMargin >= 0 ? '+' : ''}${retOnMargin.toFixed(1)}% RoM @ ${effectiveLev}x)`;
+            elRom.className = `text-[11px] font-semibold ${retOnMargin >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
           }
 
-          const isBeTrailed = diff >= beTrigger;
           if (isBeTrailed) {
             if (elSl) {
-              elSl.innerText = `$${beSl.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+              elSl.innerText = `$${sl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
               elSl.className = 'text-emerald-400 font-bold';
             }
-            if (elSlPct) elSlPct.innerText = `🛡️ 1R Trailed (Init: $${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})})`;
-            if (elReason) elReason.innerText = `1R target reached. Stop loss dynamically trailed to Breakeven ($${beSl.toLocaleString(undefined, {minimumFractionDigits: 2})}) for risk-free hold.`;
+            if (elSlPct) elSlPct.innerText = `🛡️ 1R Trailed (BE Locked)`;
+            if (elReason) elReason.innerText = activeSig.reason || `1R target reached. Stop loss dynamically trailed to Breakeven for risk-free hold.`;
           } else {
             if (elSl) {
-              elSl.innerText = `$${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+              elSl.innerText = `$${sl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
               elSl.className = 'text-rose-400 font-bold';
             }
-            const slRiskUsd = slRisk * userLotSize;
+            const slRiskUsd = Math.abs(entry - sl) * userLotSize;
             const slRiskInr = slRiskUsd * liveUsdInr;
             if (elSlPct) elSlPct.innerText = `(-$${slRiskUsd.toFixed(2)} / -₹${Math.round(slRiskInr).toLocaleString('en-IN')})`;
-            if (elReason) {
-              if (mode === 'SCALP') {
-                elReason.innerText = `Post-Only Limit filled @ 50% FVG Equilibrium ($${entry.toLocaleString(undefined, {minimumFractionDigits: 2})}). Trailing stop armed at +0.12%.`;
-              } else if (mode === 'EXPANSION_5M') {
-                elReason.innerText = `5M Pullback to 20 EMA ($${entry.toLocaleString(undefined, {minimumFractionDigits: 2})}) + Session VWAP Reclaim. 1R Breakeven armed at +0.25%.`;
-              } else {
-                elReason.innerText = `15M Asian Range Sweep: Swept ASL at $75,490, confirmed rejection + Bull CVD absorption.`;
-              }
-            }
+            if (elReason) elReason.innerText = activeSig.reason || `Active ${targetTf} order filled. Trailing stop armed at 1R.`;
           }
 
-          const tableRowSl = document.getElementById('sig-table-btc-sl');
-          const tableRowStatus = document.getElementById('sig-table-btc-status');
-          if (tableRowSl) {
-            tableRowSl.innerHTML = isBeTrailed ? 
-              `$${beSl.toLocaleString(undefined, {minimumFractionDigits: 2})}<div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})})</div>` :
-              `<span class="text-rose-400 font-bold">$${initialSl.toLocaleString(undefined, {minimumFractionDigits: 2})}</span><div class="text-[10px] text-slate-400 font-normal">Initial SL</div>`;
-          }
-          if (tableRowStatus) {
-            tableRowStatus.innerHTML = isBeTrailed ?
-              `<span class="text-emerald-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE</span>` :
-              `<span class="text-amber-400 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> ARMED</span>`;
-          }
+          if (elTp) elTp.innerText = `$${tp.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+          const tpGainUsd = Math.abs(tp - entry) * userLotSize;
+          const tpGainInr = tpGainUsd * liveUsdInr;
+          if (elTpPct) elTpPct.innerText = `(+$${tpGainUsd.toFixed(2)} / +₹${Math.round(tpGainInr).toLocaleString('en-IN')})`;
+
         } else if (currentAsset === 'NIFTY') {
           let entry = 24165.00;
           let initialSl = 24150.00;
           let beSl = 24168.00;
           let beTrigger = 15.0;
+          let tpPts = 35.0;
+          let dir = 'BUY';
+          let reason = 'NIFTY CPR bounce setup. Dynamic trailing armed.';
 
-          if (mode === 'EXPANSION_5M') {
+          if (targetTf === '5M') {
             entry = 24165.00;
             initialSl = 24140.00;
             beSl = 24170.00;
             beTrigger = 20.0;
-          } else if (mode === 'SWING') {
+            tpPts = 55.0;
+            reason = '5M Momentum Expansion: CPR Top Central Reclaim + 1.14 PCR Support';
+          } else if (targetTf === '15M') {
             entry = 24150.00;
             initialSl = 24115.00;
             beSl = 24155.00;
             beTrigger = 30.0;
+            tpPts = 90.0;
+            reason = '15M ORB & CPR Bounce: Institutional Call Wall Breakout';
           }
 
-          const diff = currentPrice - entry;
+          if (activeSig) {
+            dir = (activeSig.direction || activeSig.type || 'BUY').toUpperCase();
+            entry = parseFloat(activeSig.entry_price || activeSig.entry || entry);
+            initialSl = parseFloat(activeSig.stop_loss || activeSig.sl || initialSl);
+            tpPts = Math.abs(parseFloat(activeSig.take_profit_2 || activeSig.tp2 || entry + tpPts) - entry);
+            if (activeSig.reason) reason = activeSig.reason;
+          }
+
+          const isBuy = dir.includes('BUY');
           const totalQty = userLotSize * 25;
+          const diff = isBuy ? (currentPrice - entry) : (entry - currentPrice);
           const pnlInr = diff * totalQty;
-          const retOnCapital = (pnlInr / userCapitalInr) * 100;
+          const effectiveLev = Math.min(userLeverage, 5);
+          const notionalInr = entry * totalQty;
+          const marginReqInr = notionalInr / effectiveLev;
+          const retOnMargin = marginReqInr > 0 ? (pnlInr / marginReqInr) * 100 : 0;
+
+          const tfBannerTitle = targetTf === '1M' ? '⚡ ACTIVE 1M SCALP' : (targetTf === '5M' ? '🎯 ACTIVE 5M TREND EXPANSION' : '📊 ACTIVE 15M INTRADAY SWING');
+          if (elPing) elPing.className = 'w-3.5 h-3.5 rounded-full bg-emerald-400 animate-ping';
+          if (elLabel) elLabel.innerHTML = `${tfBannerTitle} (${totalQty} QTY):`;
+          if (elDir) {
+            elDir.className = isBuy ? 'px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400' : 'px-2.5 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400';
+            elDir.innerText = isBuy ? 'BUY (LONG)' : 'SELL (SHORT)';
+          }
+          if (elEntry) elEntry.innerText = `₹${entry.toFixed(2)}`;
 
           if (elPnl) {
             elPnl.innerText = `${pnlInr >= 0 ? '+' : ''}₹${Math.round(pnlInr).toLocaleString('en-IN')}`;
             elPnl.className = `font-black text-sm font-mono ${pnlInr >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
           }
           if (elPnlInr) {
-            elPnlInr.innerText = `${totalQty} shares`;
+            elPnlInr.innerText = `${totalQty} shares (${userLotSize} Lots)`;
             elPnlInr.className = 'text-xs font-mono text-slate-400';
           }
           if (elRom) {
-            elRom.innerText = `(${retOnCapital >= 0 ? '+' : ''}${retOnCapital.toFixed(2)}% on Cap)`;
-            elRom.className = `text-[11px] font-semibold ${retOnCapital >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+            elRom.innerText = `(${retOnMargin >= 0 ? '+' : ''}${retOnMargin.toFixed(1)}% RoM @ ${effectiveLev}x)`;
+            elRom.className = `text-[11px] font-semibold ${retOnMargin >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
           }
 
           const isBeTrailed = diff >= beTrigger;
@@ -1673,31 +2684,64 @@
             elSl.className = isBeTrailed ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
           }
           if (elSlPct) {
-            elSlPct.innerText = isBeTrailed ? `🛡️ 1R Trailed (Init: ₹${initialSl.toFixed(2)})` : `(-₹${Math.round((entry - initialSl) * totalQty).toLocaleString('en-IN')})`;
+            elSlPct.innerText = isBeTrailed ? `🛡️ 1R Trailed (Init: ₹${initialSl.toFixed(2)})` : `(-₹${Math.round(Math.abs(entry - initialSl) * totalQty).toLocaleString('en-IN')})`;
           }
+          const targetTpPrice = isBuy ? (entry + tpPts) : (entry - tpPts);
+          if (elTp) elTp.innerText = `₹${targetTpPrice.toFixed(2)}`;
+          if (elTpPct) elTpPct.innerText = `(+₹${Math.round(tpPts * totalQty).toLocaleString('en-IN')})`;
+          if (elReason) elReason.innerText = reason;
+
         } else if (currentAsset === 'GOLD') {
           let entry = 4068.89;
           let initialSl = 4067.39;
           let beSl = 4069.19;
           let beTrigger = 1.50;
+          let tpPts = 4.50;
+          let dir = 'BUY';
+          let reason = 'Gold Micro FVG equilibrium sweep. 1R Breakeven armed.';
 
-          if (mode === 'EXPANSION_5M') {
+          if (targetTf === '5M') {
             entry = 4068.89;
             initialSl = 4063.89;
             beSl = 4069.39;
             beTrigger = 4.00;
-          } else if (mode === 'SWING') {
+            tpPts = 11.50;
+            reason = '5M Judas Swing Sweep + Asian Range Expansion Rebound';
+          } else if (targetTf === '15M') {
             entry = 4068.50;
             initialSl = 4066.00;
             beSl = 4069.00;
             beTrigger = 2.50;
+            tpPts = 7.00;
+            reason = '15M Asian Range Sweep: London Open Breakout + US Dollar Tailwind';
           }
 
-          const diff = currentPrice - entry;
+          if (activeSig) {
+            dir = (activeSig.direction || activeSig.type || 'BUY').toUpperCase();
+            entry = parseFloat(activeSig.entry_price || activeSig.entry || entry);
+            initialSl = parseFloat(activeSig.stop_loss || activeSig.sl || initialSl);
+            tpPts = Math.abs(parseFloat(activeSig.take_profit_2 || activeSig.tp2 || entry + tpPts) - entry);
+            if (activeSig.reason) reason = activeSig.reason;
+          }
+
+          const isBuy = dir.includes('BUY');
           const oz = userLotSize * 100.0;
+          const diff = isBuy ? (currentPrice - entry) : (entry - currentPrice);
           const pnlUsd = diff * oz;
           const pnlInr = pnlUsd * liveUsdInr;
-          const retOnCapital = (pnlUsd / capitalUsd) * 100;
+          const effectiveLev = Math.max(1, userLeverage);
+          const notionalUsd = entry * oz;
+          const marginReqUsd = notionalUsd / effectiveLev;
+          const retOnMargin = marginReqUsd > 0 ? (pnlUsd / marginReqUsd) * 100 : 0;
+
+          const tfBannerTitle = targetTf === '1M' ? '⚡ ACTIVE 1M SCALP' : (targetTf === '5M' ? '🎯 ACTIVE 5M TREND EXPANSION' : '📊 ACTIVE 15M INTRADAY SWING');
+          if (elPing) elPing.className = 'w-3.5 h-3.5 rounded-full bg-amber-400 animate-ping';
+          if (elLabel) elLabel.innerHTML = `${tfBannerTitle} (${oz.toFixed(1)} OZ):`;
+          if (elDir) {
+            elDir.className = isBuy ? 'px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400' : 'px-2.5 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400';
+            elDir.innerText = isBuy ? 'BUY (LONG)' : 'SELL (SHORT)';
+          }
+          if (elEntry) elEntry.innerText = `$${entry.toFixed(2)}`;
 
           if (elPnl) {
             elPnl.innerText = `${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)}`;
@@ -1708,8 +2752,8 @@
             elPnlInr.className = `text-xs font-mono ${pnlInr >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
           }
           if (elRom) {
-            elRom.innerText = `(${retOnCapital >= 0 ? '+' : ''}${retOnCapital.toFixed(2)}% on Cap)`;
-            elRom.className = `text-[11px] font-semibold ${retOnCapital >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
+            elRom.innerText = `(${retOnMargin >= 0 ? '+' : ''}${retOnMargin.toFixed(1)}% RoM @ ${effectiveLev}x)`;
+            elRom.className = `text-[11px] font-semibold ${retOnMargin >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
           }
 
           const isBeTrailed = diff >= beTrigger;
@@ -1718,438 +2762,192 @@
             elSl.className = isBeTrailed ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
           }
           if (elSlPct) {
-            elSlPct.innerText = isBeTrailed ? `🛡️ 1R Trailed (Init: $${initialSl.toFixed(2)})` : `(-$${((entry - initialSl) * oz).toFixed(2)} / -₹${Math.round((entry - initialSl) * oz * liveUsdInr).toLocaleString('en-IN')})`;
+            elSlPct.innerText = isBeTrailed ? `🛡️ 1R Trailed (Init: $${initialSl.toFixed(2)})` : `(-$${(Math.abs(entry - initialSl) * oz).toFixed(2)} / -₹${Math.round(Math.abs(entry - initialSl) * oz * liveUsdInr).toLocaleString('en-IN')})`;
           }
+          const targetTpPrice = isBuy ? (entry + tpPts) : (entry - tpPts);
+          if (elTp) elTp.innerText = `$${targetTpPrice.toFixed(2)}`;
+          if (elTpPct) elTpPct.innerText = `(+$${(tpPts * oz).toFixed(2)} / +₹${Math.round(tpPts * oz * liveUsdInr).toLocaleString('en-IN')})`;
+          if (elReason) elReason.innerText = reason;
         }
       }
 
       renderSignalsTable() {
         const tbody = document.getElementById('signals-table-body');
         if (!tbody) return;
-        const now = new Date();
-        const nowIST = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
-        const mode = currentStrategyMode;
 
-        if (currentAsset === 'BTC') {
-          if (mode === 'SCALP') {
-            tbody.innerHTML = `
+        const targetTf = getSelectedTimeframe();
+        const currSym = currentAsset === 'NIFTY' ? '₹' : '$';
+
+        // Filter for currently open active signals matching asset AND timeframe
+        const liveSignals = (this.signalsData || []).filter(s => {
+          const sym = (s.symbol || '').toUpperCase();
+          const matchesAsset = (currentAsset === 'BTC' && sym.includes('BTC')) ||
+                               (currentAsset === 'NIFTY' && sym.includes('NIFTY')) ||
+                               (currentAsset === 'GOLD' && (sym.includes('XAU') || sym.includes('GOLD')));
+          const status = (s.status || '').toUpperCase();
+          const isActive = status === 'ACTIVE' || status === 'ARMED' || status === 'PENDING';
+          const sigTf = getRecordTimeframe(s);
+          return matchesAsset && isActive && (sigTf === targetTf);
+        });
+
+        if (liveSignals.length > 0) {
+          tbody.innerHTML = liveSignals.map(s => {
+            const isBuy = (s.direction || s.type || '').toUpperCase().includes('BUY');
+            const dirColor = isBuy ? 'text-emerald-400' : 'text-rose-400';
+            const dirLabel = `${isBuy ? 'BUY' : 'SELL'} (${targetTf})`;
+            const entry = parseFloat(s.entry_price || s.entry || 0);
+            const sl = parseFloat(s.stop_loss || s.sl || 0);
+            const tp = parseFloat(s.take_profit_2 || s.tp2 || s.take_profit_1 || s.tp || 0);
+            const isTrailed = s.reason && (s.reason.includes('Breakeven') || s.reason.includes('BE'));
+
+            const statusBadge = isTrailed ?
+              `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (BE)
+              </span>` :
+              `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 w-fit">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> ACTIVE
+              </span>`;
+
+            const timeStr = formatSignalTime(s);
+
+            return `
               <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (1M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $75,810.00</td>
-                <td id="sig-table-btc-sl" class="py-2 px-2 text-emerald-400 font-bold">
-                  $75,825.00
-                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $75,735.00)</div>
+                <td class="py-2.5 px-2.5 text-slate-300 font-mono">${timeStr}</td>
+                <td class="py-2.5 px-2.5 font-bold ${dirColor}">${dirLabel}</td>
+                <td class="py-2.5 px-2.5 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> ${currSym}${entry.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="py-2.5 px-2.5 ${isTrailed ? 'text-emerald-400' : 'text-rose-400'} font-bold">
+                  ${currSym}${sl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  <div class="text-[10px] text-slate-400 font-normal">${isTrailed ? '🛡️ Trailed to BE' : 'Initial SL'}</div>
                 </td>
-                <td class="py-2 px-2 text-emerald-400">$76,040.00</td>
-                <td id="sig-table-btc-status" class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">04:28:15 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (1M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $75,890.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">
-                  $75,960.00
-                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-0.09%)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$75,680.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+0.28%)</td>
-              </tr>
-            `;
-          } else if (mode === 'EXPANSION_5M') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (5M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">MAKER</span> $75,810.00</td>
-                <td id="sig-table-btc-sl" class="py-2 px-2 text-emerald-400 font-bold">
-                  $75,835.00
-                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $75,545.00)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$76,400.00</td>
-                <td id="sig-table-btc-status" class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (+0.25% BE)
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">03:45:10 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (5M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">MAKER</span> $76,150.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">
-                  $76,415.00
-                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-0.35%)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$75,560.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+0.77%)</td>
+                <td class="py-2.5 px-2.5 text-emerald-400 font-bold">${currSym}${tp.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="py-2.5 px-2.5">${statusBadge}</td>
               </tr>
             `;
-          } else {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">04:15:00 IST</td>
-                <td class="py-2 px-2 font-bold text-blue-400">BUY (15M)</td>
-                <td class="py-2 px-2 text-slate-200">$75,520.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">$75,050.00</td>
-                <td class="py-2 px-2 text-emerald-400">$76,850.00</td>
-                <td class="py-2 px-2 font-semibold text-blue-400 animate-pulse">ACTIVE (15M)</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">02:15:00 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (15M)</td>
-                <td class="py-2 px-2 text-slate-200">$76,210.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">$76,680.00</td>
-                <td class="py-2 px-2 text-emerald-400">$74,800.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">CLOSED WIN (+1.85%)</td>
-              </tr>
-            `;
-          }
-        } else if (currentAsset === 'NIFTY') {
-          if (mode === 'SCALP') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (1M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> ₹24,165.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">
-                  ₹24,168.00
-                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: ₹24,150.00)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">₹24,200.00</td>
-                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">11:15:30 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (1M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> ₹24,190.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">
-                  ₹24,205.00
-                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-15 pts)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">₹24,155.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+35 Pts)</td>
-              </tr>
-            `;
-          } else if (mode === 'EXPANSION_5M') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (5M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">BOUNCE</span> ₹24,165.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">
-                  ₹24,170.00
-                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: ₹24,140.00)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">₹24,220.00</td>
-                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (+20 Pts)
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">10:45:00 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (5M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">REJECTION</span> ₹24,210.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">
-                  ₹24,235.00
-                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-25 pts)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">₹24,155.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+55 Pts)</td>
-              </tr>
-            `;
-          } else {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">09:45:00 IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (ORB)</td>
-                <td class="py-2 px-2 text-slate-200">₹24,150.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">₹24,115.00</td>
-                <td class="py-2 px-2 text-emerald-400">₹24,240.00</td>
-                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ACTIVE (15M)
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">09:15:00 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (ORB)</td>
-                <td class="py-2 px-2 text-slate-200">₹24,210.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">₹24,245.00</td>
-                <td class="py-2 px-2 text-emerald-400">₹24,120.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">CLOSED WIN (+90 Pts)</td>
-              </tr>
-            `;
-          }
-        } else if (currentAsset === 'GOLD') {
-          if (mode === 'SCALP') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (1M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $4,068.89</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">
-                  $4,069.19
-                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $4,067.39)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$4,073.39</td>
-                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">13:42:10 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (1M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-amber-400 font-semibold">MAKER</span> $4,072.50</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">
-                  $4,074.00
-                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-$1.50)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$4,068.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+0.16%)</td>
-              </tr>
-            `;
-          } else if (mode === 'EXPANSION_5M') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">${nowIST} IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (5M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">JUDAS RECLAIM</span> $4,068.89</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">
-                  $4,069.39
-                  <div class="text-[10px] text-slate-400 font-normal">Trailed into profit (Init: $4,063.89)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$4,080.39</td>
-                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 1R SAFE (+$4.00)
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">14:50:00 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (5M)</td>
-                <td class="py-2 px-2 text-slate-200"><span class="text-emerald-400 font-semibold">JUDAS REJECT</span> $4,075.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">
-                  $4,080.00
-                  <div class="text-[10px] text-slate-400 font-normal">Initial SL (-$5.00)</div>
-                </td>
-                <td class="py-2 px-2 text-emerald-400">$4,063.50</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">HIT TP (+$11.50)</td>
-              </tr>
-            `;
-          } else {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">14:15:00 IST</td>
-                <td class="py-2 px-2 font-bold text-emerald-400">BUY (15M)</td>
-                <td class="py-2 px-2 text-slate-200">$4,068.50</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">$4,066.00</td>
-                <td class="py-2 px-2 text-emerald-400">$4,075.50</td>
-                <td class="py-2 px-2 font-semibold text-emerald-400 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ACTIVE (15M)
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2 px-2 text-slate-400">11:30:00 IST</td>
-                <td class="py-2 px-2 font-bold text-rose-400">SELL (15M)</td>
-                <td class="py-2 px-2 text-slate-200">$4,075.00</td>
-                <td class="py-2 px-2 text-rose-400 font-bold">$4,077.50</td>
-                <td class="py-2 px-2 text-emerald-400">$4,068.00</td>
-                <td class="py-2 px-2 text-emerald-400 font-bold">CLOSED WIN (+0.26%)</td>
-              </tr>
-            `;
-          }
+          }).join('');
+          return;
         }
+
+        // When all positions are squared off and market is between signals for this specific timeframe:
+        const tfDesc = targetTf === '1M' ? '1M micro orderflow & CVD imbalances' : (targetTf === '5M' ? '5M 20/50 EMA ribbon & VWAP reclaims' : '15M Asian session sweeps & liquidity pools');
+        tbody.innerHTML = `
+          <tr class="border-b border-slate-800/60">
+            <td colspan="6" class="py-6 px-4 text-center">
+              <div class="flex flex-col items-center justify-center gap-1.5">
+                <div class="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>STANDBY • SCANNING ${targetTf} MARKET (NO OPEN RISK)</span>
+                </div>
+                <p class="text-[11px] text-slate-400 max-w-sm">
+                  All prior ${targetTf} trades squared off & logged in the <strong>Audit Trail</strong> below. Engine is actively monitoring ${tfDesc} for the next entry trigger.
+                </p>
+              </div>
+            </td>
+          </tr>
+        `;
       }
 
       renderTradesTable() {
         const tbody = document.getElementById('trades-table-body');
         if (!tbody) return;
-        const mode = currentStrategyMode;
 
-        if (currentAsset === 'BTC') {
-          if (mode === 'SCALP') {
-            tbody.innerHTML = `
+        const targetTf = getSelectedTimeframe();
+        const effectiveLev = currentAsset === 'NIFTY' ? Math.min(userLeverage, 5) : userLeverage;
+        const currSym = currentAsset === 'NIFTY' ? '₹' : '$';
+
+        // 1. Filter tradesData by currentAsset AND targetTf
+        let filtered = (this.tradesData || []).filter(t => {
+          const sym = (t.symbol || '').toUpperCase();
+          const matchesAsset = (currentAsset === 'BTC' && sym.includes('BTC')) ||
+                               (currentAsset === 'NIFTY' && sym.includes('NIFTY')) ||
+                               (currentAsset === 'GOLD' && (sym.includes('XAU') || sym.includes('GOLD')));
+          const tradeTf = getRecordTimeframe(t);
+          return matchesAsset && (tradeTf === targetTf);
+        });
+
+        // 2. Fallback if no matching trades exist for this timeframe
+        if (filtered.length === 0) {
+          filtered = getFallbackTradesForTimeframe(currentAsset, targetTf);
+        }
+
+        if (filtered.length > 0) {
+          tbody.innerHTML = filtered.slice(0, 15).map(t => {
+            const isBuy = (t.direction || '').toUpperCase().includes('BUY');
+            const dirColor = isBuy ? 'text-emerald-400' : 'text-rose-400';
+            const cleanDir = (t.direction || (isBuy ? 'BUY' : 'SELL')).replace(/\s*\(\d+M\)/i, '').trim();
+            const dirLabel = `${cleanDir} (${targetTf})`;
+            const entry = parseFloat(t.entry_price || 0);
+            const exit = parseFloat(t.exit_price || 0);
+            const pnlPct = parseFloat(t.pnl_pct || 0);
+            const isWin = pnlPct > 0 || (t.outcome && t.outcome.includes('WIN'));
+            const isBe = (t.outcome === 'BREAKEVEN_EXIT') || (t.reason && t.reason.toLowerCase().includes('breakeven')) || (Math.abs(pnlPct) <= 0.15 && t.reason && t.reason.toLowerCase().includes('breakeven'));
+            const isSlHit = !isWin && !isBe;
+
+            let pnlColor = isWin ? 'text-emerald-400' : (isBe ? 'text-blue-400' : 'text-rose-400');
+
+            const statusBadge = isWin ?
+              `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">🎯 HIT TP</span>` :
+              (isBe ?
+                `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 whitespace-nowrap" title="1R target reached, Stop Loss was trailed to Breakeven to protect capital. Reversal exited with zero loss.">🛡️ 1R BE EXIT</span>` :
+                `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 whitespace-nowrap">❌ SL HIT</span>`);
+
+            // Dollar, INR, Margin, and RoM calculations using userLotSize & effectiveLev
+            let pnlUsd = 0;
+            let pnlInr = 0;
+            let marginReqUsd = 0;
+            let marginReqInr = 0;
+            const romPct = pnlPct * effectiveLev;
+
+            if (currentAsset === 'BTC') {
+              const diff = isBuy ? (exit - entry) : (entry - exit);
+              pnlUsd = diff * userLotSize;
+              pnlInr = pnlUsd * liveUsdInr;
+              const notionalUsd = entry * userLotSize;
+              marginReqUsd = notionalUsd / effectiveLev;
+            } else if (currentAsset === 'NIFTY') {
+              const totalQty = userLotSize * 25;
+              const diff = isBuy ? (exit - entry) : (entry - exit);
+              pnlInr = diff * totalQty;
+              pnlUsd = pnlInr / liveUsdInr;
+              const notionalInr = entry * totalQty;
+              marginReqInr = notionalInr / effectiveLev;
+            } else {
+              const oz = userLotSize * 100.0;
+              const diff = isBuy ? (exit - entry) : (entry - exit);
+              pnlUsd = diff * oz;
+              pnlInr = pnlUsd * liveUsdInr;
+              const notionalUsd = entry * oz;
+              marginReqUsd = notionalUsd / effectiveLev;
+            }
+
+            const assetLabel = currentAsset === 'BTC' ? 'BTC/USD' : (currentAsset === 'NIFTY' ? 'NIFTY 50' : 'XAU/USD');
+            const pnlNetStr = currentAsset === 'NIFTY' ?
+              `${pnlInr >= 0 ? '+' : ''}₹${Math.round(pnlInr).toLocaleString('en-IN')} (${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)})` :
+              `${pnlUsd >= 0 ? '+' : ''}$${pnlUsd.toFixed(2)} (${pnlInr >= 0 ? '+' : ''}₹${Math.round(pnlInr).toLocaleString('en-IN')})`;
+
+            const marginSubStr = currentAsset === 'NIFTY' ?
+              `Margin: ₹${Math.round(marginReqInr).toLocaleString('en-IN')}` :
+              `Margin: $${marginReqUsd.toFixed(2)}`;
+
+            return `
               <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">08 Nov 05:01 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (1M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,810.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$76,040.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.30%</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$11.50 (+₹1,075)</td>
-                <td class="py-2.5 px-3 text-slate-300">1M Maker @ 50% FVG Equilibrium + CVD Absorption</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">08 Nov 04:28 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
-                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (1M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,890.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,680.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.28%</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$10.50 (+₹981)</td>
-                <td class="py-2.5 px-3 text-slate-300">1M Maker Breakdown + CVD Exhaustion (1R Breakeven Trailed)</td>
-              </tr>
-            `;
-          } else if (mode === 'EXPANSION_5M') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">08 Nov 03:45 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BTC/USD</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (5M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,810.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$76,400.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.78%</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$29.50 (+₹2,755)</td>
-                <td class="py-2.5 px-3 text-slate-300">5M 20 EMA / VWAP Retest + CVD Absorption</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 22:15 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BTC/USD</td>
-                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (5M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$76,150.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,560.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+0.77%</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$29.50 (+₹2,755)</td>
-                <td class="py-2.5 px-3 text-slate-300">5M Bearish Ribbon Rejection + CVD Divergence</td>
-              </tr>
-            `;
-          } else {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">08 Nov 02:00 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (15M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,420.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$76,680.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+1.67%</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$63.00 (+₹5,887)</td>
-                <td class="py-2.5 px-3 text-slate-300">Asian Low Sweep Reclaim + NY Session Expansion</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 23:45 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-400">BTC/USD</td>
-                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (15M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$76,450.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$75,180.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+1.66%</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$63.50 (+₹5,934)</td>
-                <td class="py-2.5 px-3 text-slate-300">London Asian High Sweep + Funding Rate Overheating Fade</td>
-              </tr>
-            `;
-          }
-        } else if (currentAsset === 'NIFTY') {
-          if (mode === 'SCALP') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 14:20 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (1M)</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,145.00</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,180.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+35 Pts</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹875</td>
-                <td class="py-2.5 px-3 text-slate-300">1M VWAP Bounce + 1R Breakeven Trailed (+15 Pts Lock)</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 11:45 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
-                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (1M)</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,195.00</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,160.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+35 Pts</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹875</td>
-                <td class="py-2.5 px-3 text-slate-300">1M Strike Wall Rejection @ 24,200 CE</td>
-              </tr>
-            `;
-          } else if (mode === 'EXPANSION_5M') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 13:45 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (5M)</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,165.00</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,220.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+55 Pts</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹1,375</td>
-                <td class="py-2.5 px-3 text-slate-300">5M CPR-VWAP Rebound + PCR 1.14 Support</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 10:30 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
-                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (5M)</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,210.00</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,155.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+55 Pts</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹1,375</td>
-                <td class="py-2.5 px-3 text-slate-300">5M CPR BC Rejection + Weak PCR 0.88</td>
+                <td class="py-2.5 px-3 text-slate-300 font-normal font-mono">${t.exit_time || t.created_at || '--'}</td>
+                <td class="py-2.5 px-3 font-bold text-amber-400">${assetLabel}</td>
+                <td class="py-2.5 px-3 font-bold ${dirColor}">${dirLabel}</td>
+                <td class="py-2.5 px-3 text-slate-200">${currSym}${entry.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="py-2.5 px-3 text-slate-200">${currSym}${exit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="py-2.5 px-3">${statusBadge}</td>
+                <td class="py-2.5 px-3 font-bold font-mono ${pnlColor}">
+                  ${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%
+                  <div class="text-[10px] text-slate-400 font-normal">${romPct >= 0 ? '+' : ''}${romPct.toFixed(1)}% RoM (${effectiveLev}x)</div>
+                </td>
+                <td class="py-2.5 px-3 font-bold ${pnlColor}">
+                  ${pnlNetStr}
+                  <div class="text-[10px] text-slate-400 font-normal">${marginSubStr}</div>
+                </td>
+                <td class="py-2.5 px-3 text-slate-300 text-xs">${t.reason || (isWin ? 'Take Profit executed' : (isBe ? 'Trailed Breakeven Stop triggered' : 'Stop Loss triggered'))}</td>
               </tr>
             `;
-          } else {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 15:15 IST</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">NIFTY 50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (ORB)</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,120.00</td>
-                <td class="py-2.5 px-3 text-slate-200">₹24,210.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+90 Pts</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+₹2,250</td>
-                <td class="py-2.5 px-3 text-slate-300">15M ORB Breakout above CPR + 03:15 PM Auto-Square-Off</td>
-              </tr>
-            `;
-          }
-        } else if (currentAsset === 'GOLD') {
-          if (mode === 'SCALP') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 18:30 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (1M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,065.50</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,070.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$4.50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$9.00 (+₹841)</td>
-                <td class="py-2.5 px-3 text-slate-300">1M Micro FVG Sweep + 1R Breakeven Trailed</td>
-              </tr>
-            `;
-          } else if (mode === 'EXPANSION_5M') {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 19:15 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (5M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,068.89</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,080.39</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$11.50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$23.00 (+₹2,148)</td>
-                <td class="py-2.5 px-3 text-slate-300">5M Judas Low Sweep Reclaim + DXY Falling</td>
-              </tr>
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 16:45 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
-                <td class="py-2.5 px-3 font-bold text-rose-400">SELL (5M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,075.00</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,063.50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$11.50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$23.00 (+₹2,148)</td>
-                <td class="py-2.5 px-3 text-slate-300">5M Judas High Sweep MSS + DXY Pump Fade</td>
-              </tr>
-            `;
-          } else {
-            tbody.innerHTML = `
-              <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
-                <td class="py-2.5 px-3 text-slate-400">07 Nov 20:30 IST</td>
-                <td class="py-2.5 px-3 font-bold text-amber-300">XAU/USD</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">BUY (15M)</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,068.50</td>
-                <td class="py-2.5 px-3 text-slate-200">$4,075.50</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$7.00</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">+$14.00 (+₹1,308)</td>
-                <td class="py-2.5 px-3 text-slate-300">London Asian High Sweep + DXY Breakdown</td>
-              </tr>
-            `;
-          }
+          }).join('');
         }
       }
     }

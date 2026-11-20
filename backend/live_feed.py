@@ -35,8 +35,8 @@ class LiveMarketFeed:
         self._thread: Optional[threading.Thread] = None
         self.is_live_network = False
 
-        # Current real-world BTC price anchor (~$75,800)
-        self.current_price = 75850.0
+        # Current real-world BTC price anchor (~$62,890)
+        self.current_price = 62890.0
         self.current_funding_rate = 0.000115  # +0.0115% (Healthy neutral)
         self.cum_cvd = 120.0
 
@@ -118,7 +118,7 @@ class LiveMarketFeed:
         """Seeds realistic historical candles anchored tightly around real BTC value (~$75,800)."""
         now_ts = int(time.time())
         now_ts_aligned = now_ts - (now_ts % 900)  # align to 15m
-        base_price = 75850.0
+        base_price = 62890.0
 
         for i in range(96, 0, -1):  # past 24 hours
             c_ts = (now_ts_aligned - (i * 900)) * 1000

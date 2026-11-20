@@ -96,11 +96,29 @@ class AppRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(candles)
 
         elif path == "/api/signals":
-            signals = get_recent_signals(limit=40)
+            symbol = query.get('symbol', [None])[0]
+            status = query.get('status', [None])[0]
+            timeframe = query.get('timeframe', [None])[0]
+            limit = int(query.get('limit', [40])[0])
+            if status and status.upper() == 'ACTIVE':
+                signals = get_active_signals()
+            else:
+                signals = get_recent_signals(limit=limit)
+            if symbol:
+                signals = [s for s in signals if s.get('symbol') == symbol or symbol in s.get('symbol', '')]
+            if timeframe:
+                signals = [s for s in signals if (s.get('timeframe') or '').upper() == timeframe.upper()]
             self._send_json(signals)
 
         elif path == "/api/trades":
-            trades = get_recent_trades(limit=50)
+            symbol = query.get('symbol', [None])[0]
+            timeframe = query.get('timeframe', [None])[0]
+            limit = int(query.get('limit', [50])[0])
+            trades = get_recent_trades(limit=limit)
+            if symbol:
+                trades = [t for t in trades if t.get('symbol') == symbol or symbol in t.get('symbol', '')]
+            if timeframe:
+                trades = [t for t in trades if (t.get('timeframe') or '').upper() == timeframe.upper()]
             summary = get_performance_summary()
             self._send_json({'trades': trades, 'summary': summary})
 

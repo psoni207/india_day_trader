@@ -56,6 +56,7 @@ def init_db():
             risk_reward REAL NOT NULL,
             status TEXT NOT NULL DEFAULT 'ACTIVE',
             reason TEXT NOT NULL,
+            timeframe TEXT DEFAULT '1M',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
@@ -73,9 +74,19 @@ def init_db():
             pnl_pct REAL NOT NULL,
             outcome TEXT NOT NULL,
             reason TEXT NOT NULL,
+            timeframe TEXT DEFAULT '1M',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
+
+        try:
+            cursor.execute("ALTER TABLE signals ADD COLUMN timeframe TEXT DEFAULT '1M';")
+        except Exception:
+            pass
+        try:
+            cursor.execute("ALTER TABLE trades ADD COLUMN timeframe TEXT DEFAULT '1M';")
+        except Exception:
+            pass
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS agent_regime_logs (
@@ -137,17 +148,27 @@ def get_recent_candles(symbol: str = "BTCUSDT", timeframe: str = "15m", limit: i
 
 
 def save_signal(sig: Dict[str, Any]) -> int:
+    timeframe = sig.get('timeframe')
+    if not timeframe:
+        reason_upper = (sig.get('reason') or '').upper()
+        if '5M' in reason_upper or 'TREND EXPANSION' in reason_upper:
+            timeframe = '5M'
+        elif 'ASIAN' in reason_upper or 'SWEEP' in reason_upper or 'ALPHA' in reason_upper or '15M' in reason_upper or 'SWING' in reason_upper:
+            timeframe = '15M'
+        else:
+            timeframe = '1M'
+
     with _lock:
         conn = get_connection()
         try:
             cursor = conn.cursor()
             cursor.execute("""
-            INSERT INTO signals (symbol, timestamp, dt_str, direction, entry_price, stop_loss, take_profit_1, take_profit_2, risk_reward, status, reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO signals (symbol, timestamp, dt_str, direction, entry_price, stop_loss, take_profit_1, take_profit_2, risk_reward, status, reason, timeframe)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """, (
                 sig['symbol'], sig['timestamp'], sig['dt_str'], sig['direction'],
                 sig['entry_price'], sig['stop_loss'], sig['take_profit_1'], sig['take_profit_2'],
-                sig['risk_reward'], sig.get('status', 'ACTIVE'), sig['reason']
+                sig['risk_reward'], sig.get('status', 'ACTIVE'), sig['reason'], timeframe
             ))
             conn.commit()
             return cursor.lastrowid
@@ -187,7 +208,7 @@ def get_active_signals() -> List[Dict[str, Any]]:
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM signals WHERE status = 'ACTIVE' ORDER BY timestamp DESC;")
+            cursor.execute("SELECT *, coalesce(timeframe, '1M') as timeframe FROM signals WHERE status = 'ACTIVE' ORDER BY timestamp DESC;")
             return [dict(r) for r in cursor.fetchall()]
         finally:
             conn.close()
@@ -198,23 +219,33 @@ def get_recent_signals(limit: int = 30) -> List[Dict[str, Any]]:
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM signals ORDER BY timestamp DESC LIMIT ?;", (limit,))
+            cursor.execute("SELECT *, coalesce(timeframe, '1M') as timeframe FROM signals ORDER BY timestamp DESC LIMIT ?;", (limit,))
             return [dict(r) for r in cursor.fetchall()]
         finally:
             conn.close()
 
 
 def save_trade(t: Dict[str, Any]):
+    timeframe = t.get('timeframe')
+    if not timeframe:
+        reason_upper = (t.get('reason') or '').upper()
+        if '5M' in reason_upper or 'TREND EXPANSION' in reason_upper:
+            timeframe = '5M'
+        elif 'ASIAN' in reason_upper or 'SWEEP' in reason_upper or 'ALPHA' in reason_upper or '15M' in reason_upper or 'SWING' in reason_upper:
+            timeframe = '15M'
+        else:
+            timeframe = '1M'
+
     with _lock:
         conn = get_connection()
         try:
             conn.execute("""
-            INSERT INTO trades (signal_id, symbol, direction, entry_time, entry_price, exit_time, exit_price, pnl_pct, outcome, reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO trades (signal_id, symbol, direction, entry_time, entry_price, exit_time, exit_price, pnl_pct, outcome, reason, timeframe)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """, (
                 t.get('signal_id'), t['symbol'], t['direction'], t['entry_time'],
                 t['entry_price'], t['exit_time'], t['exit_price'], t['pnl_pct'],
-                t['outcome'], t['reason']
+                t['outcome'], t['reason'], timeframe
             ))
             conn.commit()
         finally:
@@ -226,7 +257,12 @@ def get_recent_trades(limit: int = 50) -> List[Dict[str, Any]]:
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM trades ORDER BY id DESC LIMIT ?;", (limit,))
+            cursor.execute("""
+            SELECT t.*, coalesce(t.timeframe, s.timeframe, '1M') as timeframe, coalesce(s.reason, t.reason) as signal_reason 
+            FROM trades t 
+            LEFT JOIN signals s ON t.signal_id = s.id 
+            ORDER BY t.id DESC LIMIT ?;
+            """, (limit,))
             return [dict(r) for r in cursor.fetchall()]
         finally:
             conn.close()

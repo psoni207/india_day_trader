@@ -165,7 +165,7 @@ class LiveTradingEngine:
             hit_tp = (price >= tp2) if direction == "BUY" else (price <= tp2)
 
             if hit_sl:
-                outcome_label = "BREAKEVEN_EXIT" if (sig['id'] in self.breakeven_tracked) else "LOSS"
+                outcome_label = "BREAKEVEN_EXIT" if (sig['id'] in self.breakeven_tracked) else "SL_HIT"
                 realized_pnl = round(unrealized_pnl - 0.03, 2) # Post-Only maker fee deduction ~0.03%
                 update_signal_status(sig['id'], f"CLOSED_{outcome_label}")
                 save_trade({
@@ -178,7 +178,8 @@ class LiveTradingEngine:
                     'exit_price': price,
                     'pnl_pct': realized_pnl,
                     'outcome': outcome_label,
-                    'reason': f"{'Breakeven Stop' if outcome_label == 'BREAKEVEN_EXIT' else 'Stop Loss'} triggered at ${sl:,.2f}"
+                    'reason': f"{'Breakeven Stop' if outcome_label == 'BREAKEVEN_EXIT' else 'Stop Loss'} triggered at ${sl:,.2f}",
+                    'timeframe': sig.get('timeframe', '1M')
                 })
                 icon = "🛡️" if outcome_label == "BREAKEVEN_EXIT" else "❌"
                 print(f"\n{icon} [{dt_str}] {outcome_label} HIT on #{sig['id']} {direction}: Exit @ ${price:,.2f} | Realized PnL: {realized_pnl:+.2f}%")
@@ -197,7 +198,8 @@ class LiveTradingEngine:
                     'exit_price': price,
                     'pnl_pct': realized_pnl,
                     'outcome': 'WIN_FULL',
-                    'reason': f"Take Profit triggered at ${tp2:,.2f}"
+                    'reason': f"Take Profit triggered at ${tp2:,.2f}",
+                    'timeframe': sig.get('timeframe', '1M')
                 })
                 print(f"\n🎯 [{dt_str}] TAKE PROFIT HIT on #{sig['id']} {direction}: Exit @ ${price:,.2f} | Realized PnL: +{realized_pnl:.2f}%")
                 self._broadcast('trade_closed', {'id': sig['id'], 'outcome': 'WIN_FULL', 'pnl': realized_pnl})
@@ -298,6 +300,19 @@ class LiveTradingEngine:
         # Use Post-Only entry price from setup
         entry_price = most_recent.entry_price if most_recent.entry_price > 0 else current_price
 
+        # Determine setup timeframe
+        tf = '1M'
+        if hasattr(most_recent, 'timeframe') and getattr(most_recent, 'timeframe'):
+            tf = getattr(most_recent, 'timeframe')
+        else:
+            r_up = (most_recent.reason or '').upper()
+            if '5M' in r_up or 'TREND EXPANSION' in r_up:
+                tf = '5M'
+            elif 'ASIAN' in r_up or 'SWEEP' in r_up or 'ALPHA' in r_up or '15M' in r_up or 'SWING' in r_up:
+                tf = '15M'
+            else:
+                tf = '1M'
+
         sig_id = save_signal({
             'symbol': self.symbol,
             'timestamp': most_recent.timestamp,
@@ -309,7 +324,8 @@ class LiveTradingEngine:
             'take_profit_2': most_recent.take_profit_2,
             'risk_reward': most_recent.risk_reward,
             'status': 'ACTIVE',
-            'reason': most_recent.reason
+            'reason': most_recent.reason,
+            'timeframe': tf
         })
 
         dir_icon = "🟢" if most_recent.direction == "BUY" else "🔴"
